@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>ICT Desk · Dalton Den Haag</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --open-a:  #14532d;
+      --open-b:  #16a34a;
+      --clos-a:  #7f1d1d;
+      --clos-b:  #dc2626;
+      --glass:   rgba(0,0,0,0.22);
+      --border:  rgba(255,255,255,0.14);
+      --font:    'Barlow Condensed', 'Arial Narrow', sans-serif;
+    }
+
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%; overflow: hidden;
+      font-family: var(--font);
+      display: flex;
+      flex-direction: column;
+    }
+    input, textarea, button { font-family: var(--font); }
+
+    /* ── Background ── */
+    #bg {
+      position: fixed; inset: 0; z-index: 0;
+      transition: background 1s ease;
+    }
+    body.status-open   #bg { background: linear-gradient(145deg, var(--open-a), var(--open-b)); }
+    body.status-closed #bg { background: linear-gradient(145deg, var(--clos-a), var(--clos-b)); }
+    #bg::before, #bg::after {
+      content: ''; position: absolute; border-radius: 50%;
+      filter: blur(100px); opacity: 0.28;
+      animation: blob 11s ease-in-out infinite alternate;
+    }
+    #bg::before { width: 60vw; height: 60vw; top: -20vw; left: -20vw; background: rgba(255,255,255,0.28); }
+    #bg::after  { width: 50vw; height: 50vw; bottom: -15vw; right: -15vw; background: rgba(0,0,0,0.22); animation-delay: -5s; }
+    @keyframes blob { from { transform: scale(1); } to { transform: scale(1.12) translate(4vw,3vh); } }
+
+    @keyframes bg-pulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.18)} }
+    body.has-unread #bg { animation: bg-pulse 5s ease-in-out infinite; }
+
+    /* ── School label — triple-tap → admin (invisible tap zone) ── */
+    #school-label {
+      position: relative; z-index: 2;
+      height: 32px; flex-shrink: 0;
+      cursor: default;
+    }
+
+    /* ── Status word — full-width, top ── */
+    #status-word-wrap {
+      position: relative; z-index: 2;
+      flex-shrink: 0;
+      display: flex; align-items: flex-end; justify-content: center;
+      overflow: hidden; /* prevent horizontal bleed */
+      padding: 0;
+      line-height: 1;
+    }
+
+    #status-word {
+      font-family: 'Bebas Neue', var(--font);
+      font-size: min(15vw, 16vh);
+      letter-spacing: 0.28em;
+      margin-right: -0.28em;
+      color: #fff;
+      line-height: 0.88;
+      text-shadow: 0 6px 48px rgba(0,0,0,0.30);
+      transition: letter-spacing 0.6s ease, margin-right 0.6s ease;
+      white-space: nowrap;
+    }
+    body.status-open #status-word {
+      letter-spacing: 1.05em;
+      margin-right: -1.05em;
+    }
+
+    /* ── Slider row — FAQ btn left, slider right ── */
+    #slider-row {
+      position: relative; z-index: 2;
+      flex-shrink: 0;
+      display: flex; flex-direction: row;
+      align-items: stretch;
+      padding: 0.4rem 2rem 0.7rem;
+      gap: 1rem;
+    }
+
+    /* ── 2-column grid ── */
+    #layout {
+      position: relative; z-index: 1;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+
+    /* ── LEFT panel — form, bottom-aligned ── */
+    #left-panel {
+      align-self: end;
+      display: flex; flex-direction: column;
+      padding: 1.5rem 1.6rem 2rem;
+      background: var(--glass);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      height: clamp(180px, 34vh, 380px);
+      overflow: hidden;
+    }
+
+    /* form section fills space when GESLOTEN */
+    #form-section {
+      display: flex; flex-direction: column; gap: 1rem; flex: 1; min-height: 0;
+    }
+    body.status-open #form-section { display: none; }
+
+    #left-title {
+      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      letter-spacing: 0.14em; color: #fff; flex-shrink: 0;
+    }
+
+    /* OPEN welcome — centered in same panel height */
+    #open-welcome {
+      display: none; flex: 1; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1.8rem; text-align: center;
+    }
+    body.status-open #open-welcome { display: flex; }
+    #open-welcome-text {
+      font-size: clamp(1.7rem, 3.4vw, 2.6rem);
+      letter-spacing: 0.16em; color: #fff; line-height: 1.2;
+    }
+    #open-welcome-emoji { font-size: 5rem; line-height: 1; }
+
+    #msg-form { display: flex; flex-direction: column; gap: 0.7rem; }
+
+    #msg-form input,
+    #msg-form textarea {
+      background: rgba(255,255,255,0.14);
+      border: 1.5px solid rgba(255,255,255,0.26);
+      border-radius: 12px; padding: 0.85rem 1rem;
+      color: #fff; font-size: 0.95rem; letter-spacing: 0.05em;
+      min-height: 50px;
+      transition: border-color 0.2s, background 0.2s;
+      user-select: text;
+    }
+    #msg-form input::placeholder,
+    #msg-form textarea::placeholder { color: rgba(255,255,255,0.40); }
+    #msg-form input:focus,
+    #msg-form textarea:focus {
+      border-color: rgba(255,255,255,0.60);
+      background: rgba(255,255,255,0.20); outline: none;
+    }
+    #f-bericht { height: clamp(55px, 7vh, 90px); resize: none; }
+
+    #f-submit {
+      padding: 1rem; min-height: 52px;
+      background: rgba(255,255,255,0.92); color: #7f1d1d;
+      font-size: 1rem; letter-spacing: 0.14em;
+      border: none; border-radius: 12px; cursor: pointer;
+      transition: transform 0.12s;
+    }
+    body.status-open #f-submit { color: #14532d; }
+    #f-submit:active { transform: scale(0.94); }
+
+    @keyframes flash {
+      0%,100%{filter:brightness(1)} 25%{filter:brightness(1.5)}
+      50%{filter:brightness(0.78)} 75%{filter:brightness(1.35)}
+    }
+    body.flashing #bg { animation: flash 0.5s ease 3; }
+
+    /* ── SPARK animation ── */
+    @property --spark-angle {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    @keyframes spark-rotate { to { --spark-angle: 360deg; } }
+
+    /* ── CHUNKY SLIDER ── */
+    #status-slider { flex: 1; min-width: 0; }
+
+    #sl-track {
+      position: relative;
+      width: 100%; height: min(200px, 19vh);
+      background: rgba(0,0,0,0.28);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 26px;
+      border: 2px solid rgba(255,255,255,0.16);
+      /* no overflow:hidden — needed for glow to bleed out */
+    }
+
+    /* Knob: chunky rectangle */
+    #sl-knob {
+      position: absolute;
+      top: 8px; left: 8px;
+      width: calc(65% - 8px);
+      height: calc(100% - 16px);
+      background: rgba(255,255,255,0.95);
+      border-radius: 19px;
+      cursor: grab; touch-action: none;
+      isolation: isolate;              /* stacking context for sparks */
+      display: flex; align-items: center; justify-content: center;
+      transition: left 0.42s cubic-bezier(0.34,1.56,0.64,1),
+                  background 0.6s ease;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.30);
+    }
+    #sl-knob.dragging { transition: none; cursor: grabbing; }
+    body.status-open #sl-knob {
+      left: calc(35% + 0px);
+      background: rgba(240,255,245,0.97);
+    }
+
+    #sl-knob-icon {
+      font-size: 2rem; line-height: 1;
+      color: rgba(0,0,0,0.25);
+      pointer-events: none;
+      position: relative; z-index: 2;
+    }
+
+    /* GREEN glow ring around knob when OPEN — pulsing halo, no rotation */
+    @keyframes knob-pulse {
+      0%, 100% {
+        box-shadow:
+          0 0 0 3px rgba(74,222,128,0.90),
+          0 0 14px 5px rgba(74,222,128,0.55),
+          0 0 32px 10px rgba(74,222,128,0.28),
+          0 0 56px 18px rgba(134,239,172,0.14);
+      }
+      50% {
+        box-shadow:
+          0 0 0 4px rgba(134,239,172,1.00),
+          0 0 22px 8px rgba(74,222,128,0.75),
+          0 0 48px 16px rgba(74,222,128,0.40),
+          0 0 80px 28px rgba(187,247,208,0.22);
+      }
+    }
+    body.status-open #sl-knob {
+      animation: knob-pulse 2.4s ease-in-out infinite;
+    }
+
+    /* ── RIGHT panel — messages, same fixed height as left panel ── */
+    #right-panel {
+      align-self: end;
+      display: flex; flex-direction: column;
+      padding: 1.5rem 1.4rem 2rem;
+      background: var(--glass);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      gap: 0.8rem;
+      overflow: hidden;
+      height: clamp(180px, 34vh, 380px);
+    }
+
+    #right-title {
+      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      letter-spacing: 0.14em; color: #fff;
+      flex-shrink: 0;
+    }
+
+    #right-msgs {
+      flex: 1; overflow-y: auto; min-height: 0;
+      display: flex; flex-direction: column; gap: 0.7rem;
+      padding-right: 0.3rem;
+    }
+    #right-msgs::-webkit-scrollbar { width: 4px; }
+    #right-msgs::-webkit-scrollbar-track { background: transparent; }
+    #right-msgs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.20); border-radius: 2px; }
+
+    /* Message cards */
+    .msg-card {
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+    }
+
+    /* ── AMBER SPARK border on unread cards ── */
+    .msg-card.unread {
+      border: none !important;
+      background: rgba(22,14,2,0.72) !important;
+      position: relative;
+      isolation: isolate;
+      animation: none !important;
+    }
+
+    .msg-card.unread::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 14px; padding: 2.5px;
+      background: conic-gradient(
+        from var(--spark-angle),
+        rgba(251,191,36,0.18) 0deg,
+        rgba(251,191,36,0.55) 80deg,
+        rgba(255,220,100,0.90) 105deg,
+        rgba(255,255,220,1.00) 115deg,
+        rgba(255,200,60,0.80) 125deg,
+        rgba(251,191,36,0.22) 160deg,
+        rgba(251,191,36,0.22) 290deg,
+        rgba(251,191,36,0.75) 320deg,
+        rgba(255,230,80,1.00) 343deg,
+        rgba(255,255,255,1.00) 352deg,
+        rgba(255,180,30,0.90) 358deg,
+        rgba(251,191,36,0.18) 360deg
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                    linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      animation: spark-rotate 2.2s linear infinite;
+      z-index: 1;
+    }
+
+    .msg-card.unread::after {
+      content: '';
+      position: absolute; inset: -8px; border-radius: 22px;
+      background: conic-gradient(
+        from var(--spark-angle),
+        transparent 0deg, transparent 70deg,
+        rgba(251,191,36,0.08) 90deg,
+        rgba(255,200,60,0.35) 108deg,
+        rgba(255,255,160,0.55) 116deg,
+        rgba(255,200,60,0.25) 128deg,
+        transparent 155deg, transparent 280deg,
+        rgba(251,191,36,0.12) 310deg,
+        rgba(255,240,100,0.50) 343deg,
+        rgba(255,255,220,0.80) 352deg,
+        rgba(255,200,60,0.40) 358deg,
+        transparent 360deg
+      );
+      filter: blur(9px); z-index: -1;
+      animation: spark-rotate 2.2s linear infinite;
+    }
+
+    .msg-card.unread .msg-meta,
+    .msg-card.unread .msg-body,
+    .msg-card.unread .msg-gelezen-btn,
+    .msg-card.unread .msg-delete-btn { position: relative; z-index: 2; }
+
+    .msg-meta {
+      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+      font-size: 0.80rem; letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.44); margin-bottom: 0.35rem;
+    }
+    .msg-meta strong { color: rgba(255,255,255,0.90); }
+
+    .msg-delete-btn {
+      margin-left: auto; flex-shrink: 0;
+      width: 34px; height: 34px;
+      background: rgba(248,113,113,0.16);
+      border: 1.5px solid rgba(248,113,113,0.40);
+      border-radius: 8px; color: #f87171; font-size: 1.15rem;
+      cursor: pointer; display: grid; place-items: center;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .msg-delete-btn:active { background: rgba(248,113,113,0.35); transform: scale(0.88); }
+
+    .msg-body {
+      font-size: 0.88rem; letter-spacing: 0.03em;
+      color: rgba(255,255,255,0.82); line-height: 1.5;
+      white-space: pre-wrap; word-break: break-word; margin-bottom: 0.5rem;
+    }
+    .msg-gelezen-btn {
+      padding: 0.35rem 0.9rem; min-height: 38px;
+      background: rgba(251,191,36,0.18);
+      border: 1.5px solid rgba(251,191,36,0.55);
+      border-radius: 8px; color: #fde68a; font-size: 0.75rem;
+      letter-spacing: 0.12em; cursor: pointer;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .msg-gelezen-btn:active { background: rgba(251,191,36,0.35); transform: scale(0.93); }
+
+    .right-empty {
+      color: rgba(255,255,255,0.28); font-size: 0.9rem;
+      letter-spacing: 0.1em; text-align: center; padding: 2rem 0;
+    }
+
+    /* ── PIN overlay ── */
+    #pin-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      z-index: 50;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    #pin-overlay.visible { opacity: 1; pointer-events: all; }
+    #pin-overlay h2 { color:#fff; font-size:1.5rem; letter-spacing:0.14em; margin-bottom:2rem; }
+    #pin-dots { display:flex; gap:1.2rem; margin-bottom:2.5rem; }
+    .pin-dot { width:20px; height:20px; border-radius:50%; border:2.5px solid rgba(255,255,255,0.38); background:transparent; transition:background .15s,border-color .15s; }
+    .pin-dot.filled { background:#fff; border-color:#fff; }
+    .pin-dot.error  { background:#f87171; border-color:#f87171; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-14px)} 40%{transform:translateX(12px)} 60%{transform:translateX(-9px)} 80%{transform:translateX(7px)} }
+    #pin-dots.shake { animation:shake .42s ease; }
+    #pin-keypad { display:grid; grid-template-columns:repeat(3,96px); gap:1rem; }
+    .pin-key { width:96px; height:96px; border-radius:50%; border:2px solid rgba(255,255,255,0.16); background:rgba(255,255,255,0.08); color:#fff; font-size:1.8rem; cursor:pointer; display:grid; place-items:center; transition:background .12s,transform .1s; }
+    .pin-key:active { background:rgba(255,255,255,0.25); transform:scale(0.90); }
+    .pin-key.pin-del    { font-size:1.2rem; color:rgba(255,255,255,0.52); }
+    .pin-key.pin-cancel { font-size:0.85rem; color:rgba(255,255,255,0.35); border-color:transparent; background:transparent; }
+
+    /* ── Admin panel ── */
+    #admin-panel {
+      position: fixed; inset: 0;
+      background: rgba(5,5,10,0.95);
+      backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px);
+      z-index: 40;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 2.5rem 1.5rem 2rem; overflow-y: auto; gap: 1.8rem;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    #admin-panel.visible { opacity:1; pointer-events:all; }
+    #admin-panel h1 { color:#fff; font-size:1.7rem; letter-spacing:0.14em; }
+    #msg-section { width:100%; max-width:780px; }
+    .msg-section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; }
+    .msg-section-header h2 { color:#fff; font-size:1.2rem; letter-spacing:0.1em; display:flex; align-items:center; gap:0.6rem; }
+    #unread-badge { background:#fbbf24; color:#000; font-size:0.75rem; letter-spacing:0.05em; padding:0.15rem 0.55rem; border-radius:99px; display:none; }
+    #unread-badge.visible { display:inline; }
+    #clear-all { padding:0.55rem 1.2rem; min-height:46px; background:rgba(248,113,113,0.14); color:#f87171; border:1.5px solid rgba(248,113,113,0.36); border-radius:10px; font-size:0.9rem; letter-spacing:0.06em; cursor:pointer; }
+    #clear-all:active { background:rgba(248,113,113,0.28); }
+    .admin-tabs { display:flex; gap:0.4rem; background:rgba(255,255,255,0.06); border-radius:12px; padding:0.35rem; margin-bottom:1rem; }
+    .admin-tab { flex:1; padding:0.65rem 1rem; min-height:50px; border:none; border-radius:9px; background:transparent; color:rgba(255,255,255,0.38); font-size:0.9rem; letter-spacing:0.08em; cursor:pointer; transition:background .15s,color .15s; }
+    .admin-tab.active { background:rgba(255,255,255,0.12); color:#fff; }
+    #msgs-list { display:flex; flex-direction:column; gap:0.8rem; }
+    .admin-msg-card { background:rgba(255,255,255,0.07); border-radius:14px; padding:1.1rem 1.3rem; border:1.5px solid rgba(255,255,255,0.10); }
+    .admin-msg-card.unread   { border-color:#fbbf24; background:rgba(251,191,36,0.08); }
+    .admin-msg-card.archived { opacity:0.62; border-color:rgba(255,255,255,0.06); }
+    .admin-msg-meta { font-size:0.82rem; letter-spacing:0.04em; color:rgba(255,255,255,0.44); margin-bottom:0.45rem; display:flex; gap:1rem; flex-wrap:wrap; }
+    .admin-msg-meta strong { color:rgba(255,255,255,0.88); }
+    .admin-msg-body { color:rgba(255,255,255,0.84); font-size:0.97rem; line-height:1.5; white-space:pre-wrap; word-break:break-word; }
+    .admin-msg-actions { display:flex; gap:0.5rem; margin-top:0.85rem; justify-content:flex-end; }
+    .msg-btn { padding:0.45rem 1rem; min-height:46px; border:1.5px solid; border-radius:9px; font-size:0.78rem; letter-spacing:0.06em; cursor:pointer; background:transparent; transition:background .12s,transform .1s; }
+    .msg-btn:active { transform:scale(0.90); }
+    .msg-btn-archive   { border-color:rgba(251,191,36,0.48); color:#fbbf24; }
+    .msg-btn-archive:active   { background:rgba(251,191,36,0.18); }
+    .msg-btn-unarchive { border-color:rgba(74,222,128,0.48); color:#4ade80; }
+    .msg-btn-unarchive:active { background:rgba(74,222,128,0.18); }
+    .msg-btn-delete    { border-color:rgba(248,113,113,0.48); color:#f87171; }
+    .msg-btn-delete:active    { background:rgba(248,113,113,0.18); }
+    .msg-empty { color:rgba(255,255,255,0.28); text-align:center; padding:2.5rem; font-size:0.92rem; letter-spacing:0.1em; }
+    #close-admin { margin-top:auto; padding:1rem 2.5rem; min-height:54px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.65); border:1.5px solid rgba(255,255,255,0.14); border-radius:14px; font-size:1rem; letter-spacing:0.10em; cursor:pointer; }
+    #close-admin:active { background:rgba(255,255,255,0.12); }
+
+    /* ── Toast ── */
+    #toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(80px); background:rgba(5,5,10,0.94); color:#fff; padding:0.9rem 1.8rem; border-radius:12px; font-size:0.95rem; letter-spacing:0.06em; box-shadow:0 4px 20px rgba(0,0,0,0.40); border:1px solid rgba(255,255,255,0.10); z-index:999; opacity:0; pointer-events:none; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s; }
+    #toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+    :focus-visible { outline:3px solid rgba(255,255,255,0.60); outline-offset:2px; }
+    :focus:not(:focus-visible) { outline:none; }
+
+    /* ── FAQ button — compact tile left of slider ── */
+    #faq-btn {
+      flex-shrink: 0;
+      width: 110px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 0.45rem;
+      padding: 0.8rem 0.6rem;
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.82);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    }
+    #faq-btn .faq-btn-icon { font-size: 2rem; line-height: 1; }
+    #faq-btn .faq-btn-label {
+      font-size: 0.72rem; letter-spacing: 0.16em;
+      text-align: center; line-height: 1.3;
+    }
+    #faq-btn:hover   { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.50); }
+    #faq-btn:active  { transform: scale(0.95); }
+
+    /* ── FAQ Modal — full screen, accessible ── */
+    #faq-overlay {
+      position: fixed; inset: 0;
+      background: #0b0b14;
+      z-index: 60;
+      display: flex;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    #faq-overlay.visible { opacity: 1; pointer-events: all; }
+
+    #faq-panel {
+      background: #0e0e1c;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      animation: faq-up 0.26s cubic-bezier(0.22,0.61,0.36,1);
+    }
+    @keyframes faq-up {
+      from { transform: translateY(28px); opacity: 0; }
+      to   { transform: none; opacity: 1; }
+    }
+
+    .faq-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.6rem 2rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.09);
+      flex-shrink: 0; min-height: 84px;
+    }
+    .faq-header h2 {
+      color: #fff; font-size: clamp(1.6rem, 3vw, 2.4rem);
+      letter-spacing: 0.14em;
+    }
+    .faq-close {
+      width: 68px; height: 68px; border-radius: 18px;
+      border: 2px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.70);
+      font-size: 2.2rem; line-height: 1; cursor: pointer;
+      display: grid; place-items: center; flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .faq-close:hover  { background: rgba(255,255,255,0.15); color: #fff; }
+    .faq-close:active { background: rgba(255,255,255,0.22); }
+
+    #faq-list {
+      display: flex; flex-direction: column; gap: 1rem;
+      padding: 1.8rem 2rem 2rem;
+      overflow-y: auto; flex: 1;
+    }
+
+    /* Category view: 2×2 grid */
+    #faq-list.cat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-auto-rows: 1fr;
+      gap: 1.2rem;
+    }
+    .faq-section-full { grid-column: 1 / -1; }
+
+    .faq-section-label {
+      font-size: 0.88rem; letter-spacing: 0.22em;
+      color: rgba(255,255,255,0.36);
+      padding: 0.3rem 0 0.9rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+
+    /* Category cards — large, icon on top, centered */
+    .faq-cat-card {
+      background: var(--cat-kleur);
+      border: 2.5px solid var(--cat-rand);
+      border-radius: 24px;
+      padding: 2rem 1.2rem;
+      cursor: pointer;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem; text-align: center;
+      min-height: 160px;
+      transition: filter 0.15s, transform 0.12s;
+    }
+    .faq-cat-card:hover  { filter: brightness(1.35); }
+    .faq-cat-card:active { transform: scale(0.95); }
+    .faq-cat-card .faq-q-icon { font-size: 3.4rem; line-height: 1; }
+    .faq-cat-card .faq-q-text {
+      color: #fff;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-weight: 700; letter-spacing: 0.10em; line-height: 1.2;
+    }
+
+    /* Question cards — tall, full-width rows */
+    .faq-q-card {
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 1.5rem 1.8rem;
+      min-height: 96px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 1.4rem;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .faq-q-card:hover  { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
+    .faq-q-card:active { transform: scale(0.98); }
+    .faq-q-card .faq-q-icon { font-size: 2.6rem; flex-shrink: 0; }
+    .faq-q-text {
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1.1rem, 2.1vw, 1.4rem);
+      letter-spacing: 0.03em; line-height: 1.4; flex: 1;
+    }
+    .faq-q-arrow {
+      margin-left: auto; flex-shrink: 0;
+      color: rgba(255,255,255,0.32); font-size: 1.8rem;
+    }
+
+    /* Back button inline (question list) */
+    .faq-back-inline {
+      align-self: flex-start; margin-bottom: 0.2rem;
+      padding: 0.9rem 1.8rem; min-height: 62px;
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+    }
+
+    /* Answer view */
+    #faq-answer {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 3rem 3rem 2.5rem; gap: 2.4rem;
+      text-align: center; flex: 1; overflow-y: auto;
+    }
+    #faq-answer[hidden] { display: none; }
+    #faq-answer-icon { font-size: 7rem; line-height: 1; }
+    #faq-answer-text {
+      color: rgba(255,255,255,0.92);
+      font-size: clamp(1.35rem, 2.6vw, 2rem);
+      letter-spacing: 0.04em; line-height: 1.75;
+      max-width: 720px;
+    }
+    #faq-answer-text strong { color: #fff; }
+    .faq-back-btn {
+      margin-top: 0.8rem;
+      padding: 1.2rem 2.5rem; min-height: 76px;
+      width: min(520px, 82vw);
+      background: rgba(255,255,255,0.09);
+      border: 2px solid rgba(255,255,255,0.24);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.80);
+      font-family: var(--font);
+      font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+      letter-spacing: 0.12em;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .faq-back-btn:hover  { background: rgba(255,255,255,0.18); color: #fff; }
+    .faq-back-btn:active { background: rgba(255,255,255,0.24); }
+  </style>
+</head>
+<body class="status-closed">
+
+  <div id="bg"></div>
+
+  <!-- school label — invisible, triple-tap → admin -->
+  <div id="school-label"></div>
+
+  <!-- Status word: full-width, top -->
+  <div id="status-word-wrap">
+    <div id="status-word" role="status" aria-live="polite">GESLOTEN</div>
+  </div>
+
+  <!-- Slider row: FAQ btn left, slider right -->
+  <div id="slider-row">
+    <button id="faq-btn" onclick="openFaq()">
+      <span class="faq-btn-icon">❓</span>
+      <span class="faq-btn-label">VEEL-<br>GESTELDE<br>VRAGEN</span>
+    </button>
+    <div id="status-slider" aria-label="Status wisselen">
+      <div id="sl-track">
+        <div id="sl-knob"
+             role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"
+             tabindex="0" aria-label="Sleep om status te wisselen">
+          <div id="sl-knob-icon">⇔</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2-column grid -->
+  <div id="layout">
+
+    <!-- LEFT: form (GESLOTEN) / welcome (OPEN) -->
+    <div id="left-panel">
+      <div id="form-section">
+        <div id="left-title">LAAT EEN<br>BERICHT ACHTER</div>
+        <form id="msg-form" onsubmit="submitMsg(event)" novalidate>
+          <input id="f-naam"    type="text"  placeholder="Naam"            required maxlength="60"  autocomplete="off">
+          <input id="f-lnr"     type="text"  placeholder="Leerlingnummer"  required maxlength="20"  autocomplete="off">
+          <textarea id="f-bericht" placeholder="Jouw bericht..."           required maxlength="600"></textarea>
+          <button id="f-submit" type="submit">VERSTUUR →</button>
+        </form>
+      </div>
+      <div id="open-welcome">
+        <div id="open-welcome-text">KOM GERUST<br>BINNEN</div>
+        <div id="open-welcome-emoji">😊</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: messages, bottom-aligned -->
+    <div id="right-panel">
+      <div id="right-title">BERICHTEN</div>
+      <div id="right-msgs"></div>
+    </div>
+
+  </div>
+
+  <!-- PIN -->
+  <div id="pin-overlay" role="dialog" aria-modal="true" aria-label="Beheer inloggen">
+    <h2>🔐 ICT DESK BEHEER</h2>
+    <div id="pin-dots">
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div id="pin-keypad">
+      <div class="pin-key" data-k="1">1</div><div class="pin-key" data-k="2">2</div><div class="pin-key" data-k="3">3</div>
+      <div class="pin-key" data-k="4">4</div><div class="pin-key" data-k="5">5</div><div class="pin-key" data-k="6">6</div>
+      <div class="pin-key" data-k="7">7</div><div class="pin-key" data-k="8">8</div><div class="pin-key" data-k="9">9</div>
+      <div class="pin-key pin-del" data-k="del">⌫</div>
+      <div class="pin-key" data-k="0">0</div>
+      <div class="pin-key pin-cancel" data-k="cancel">ANNULEER</div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <div id="admin-panel" role="dialog" aria-modal="true" aria-label="Beheer paneel">
+    <h1>⚙️ ICT DESK BEHEER</h1>
+    <div id="msg-section">
+      <div class="msg-section-header">
+        <h2>📋 BERICHTEN <span id="unread-badge"></span></h2>
+        <button id="clear-all" onclick="clearAll()">Alles wissen</button>
+      </div>
+      <div class="admin-tabs">
+        <button class="admin-tab active" id="tab-inbox"   onclick="switchTab('inbox')">📥 INBOX</button>
+        <button class="admin-tab"        id="tab-archief" onclick="switchTab('archief')">📦 ARCHIEF</button>
+      </div>
+      <div id="msgs-list"></div>
+    </div>
+    <button id="close-admin" onclick="closeAdmin()">← TERUG NAAR BALIESCHERM</button>
+  </div>
+
+  <div id="toast" role="alert" aria-live="assertive"></div>
+
+  <!-- FAQ Modal -->
+  <div id="faq-overlay" role="dialog" aria-modal="true" aria-label="Veelgestelde vragen">
+    <div id="faq-panel">
+      <div class="faq-header">
+        <h2>VEELGESTELDE VRAGEN</h2>
+        <button class="faq-close" onclick="closeFaq()" aria-label="Sluiten">×</button>
+      </div>
+      <div id="faq-list">
+        <!-- rendered by JS -->
+      </div>
+      <div id="faq-answer" hidden>
+        <div id="faq-answer-icon"></div>
+        <div id="faq-answer-text"></div>
+        <button class="faq-back-btn" onclick="showFaqList()">← TERUG NAAR VRAGEN</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NS = 'ict-desk-v1', KEY_S = NS+':status', KEY_M = NS+':messages', KEY_A = NS+':archived', KEY_P = NS+':pin';
+    const DEFAULT_PIN = '1234';
+
+    let currentStatus = load(KEY_S, 'closed');
+    let messages = load(KEY_M, []);
+    let archived = load(KEY_A, []);
+    let activeTab = 'inbox';
+    let pinBuffer = '', tapCount = 0, tapTimer = null, toastTimer = null;
+
+    applyStatus(currentStatus, false);
+    renderRightPanel();
+
+    document.getElementById('school-label').addEventListener('pointerdown', () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { tapCount = 0; }, 700);
+      if (tapCount >= 3) { tapCount = 0; openPin(); }
+    });
+    document.getElementById('pin-keypad').addEventListener('pointerdown', e => {
+      const k = e.target.closest('[data-k]');
+      if (k) handlePinKey(k.dataset.k);
+    });
+
+    // ── Slider ───────────────────────────────────────────────
+    const slKnob = document.getElementById('sl-knob');
+    const slTrack = document.getElementById('sl-track');
+    let dragging = false, dragStartX = 0, knobStartL = 0;
+
+    slKnob.addEventListener('pointerdown', e => {
+      dragging = true; dragStartX = e.clientX; knobStartL = slKnob.offsetLeft;
+      slKnob.classList.add('dragging'); slKnob.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    slKnob.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const max = slTrack.offsetWidth - slKnob.offsetWidth - 8;
+      slKnob.style.left = Math.max(8, Math.min(max, knobStartL + e.clientX - dragStartX)) + 'px';
+    });
+    slKnob.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      dragging = false; slKnob.classList.remove('dragging'); slKnob.style.left = '';
+      const delta = e.clientX - dragStartX, thr = slTrack.offsetWidth * 0.25;
+      if      (currentStatus === 'closed' && delta >  thr) { applyStatus('open');   toast('✅ BALIE STAAT NU OP OPEN'); }
+      else if (currentStatus === 'open'   && delta < -thr) { applyStatus('closed'); toast('🔴 BALIE STAAT NU OP GESLOTEN'); }
+    });
+    slKnob.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' && currentStatus === 'closed') applyStatus('open');
+      if (e.key === 'ArrowLeft'  && currentStatus === 'open')   applyStatus('closed');
+    });
+
+    // ── Status ───────────────────────────────────────────────
+    function applyStatus(s, animate = true) {
+      currentStatus = s; save(KEY_S, s);
+      const hu = document.body.classList.contains('has-unread');
+      document.body.className = (hu ? 'has-unread ' : '') + 'status-' + s;
+      if (animate) {
+        const sw = document.getElementById('status-word');
+        sw.style.cssText = 'transform:scale(0.88);opacity:0.3;transition:transform .35s,opacity .35s';
+        setTimeout(() => { sw.style.cssText = ''; }, 350);
+      }
+      const isOpen = s === 'open';
+      document.getElementById('status-word').textContent = isOpen ? 'OPEN' : 'GESLOTEN';
+      document.getElementById('sl-knob').setAttribute('aria-valuenow', isOpen ? '1' : '0');
+    }
+
+    function checkUnread() {
+      document.body.classList.toggle('has-unread', messages.some(m => !m.read));
+    }
+
+    // ── Right panel ──────────────────────────────────────────
+    function renderRightPanel() {
+      const c = document.getElementById('right-msgs');
+      if (!messages.length) {
+        c.innerHTML = '<div class="right-empty">Geen berichten</div>';
+        checkUnread(); return;
+      }
+      c.innerHTML = messages.slice().reverse().map(m => `
+        <div class="msg-card ${m.read ? '' : 'unread'}">
+          <div class="msg-meta">
+            <strong>${esc(m.naam)}</strong><span>${esc(m.lnr)}</span><span>${esc(m.ts)}</span>
+            <button class="msg-delete-btn" onclick="deleteFromRight('${esc(m.id)}')" aria-label="Verwijderen">×</button>
+          </div>
+          <div class="msg-body">${esc(m.bericht)}</div>
+          ${!m.read ? `<button class="msg-gelezen-btn" onclick="markOneRead('${esc(m.id)}')">✓ GELEZEN</button>` : ''}
+        </div>`).join('');
+      checkUnread();
+    }
+
+    function markOneRead(id) {
+      const m = messages.find(m => m.id === id);
+      if (!m) return;
+      m.read = true; save(KEY_M, messages); renderRightPanel();
+    }
+    function deleteFromRight(id) {
+      messages = messages.filter(m => m.id !== id);
+      save(KEY_M, messages); renderRightPanel(); toast('🗑️ VERWIJDERD');
+    }
+
+    // Enter in textarea submits; Shift+Enter still inserts newline
+    document.getElementById('f-bericht').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('msg-form').requestSubmit(); }
+    });
+
+    // ── Submit ───────────────────────────────────────────────
+    function submitMsg(e) {
+      e.preventDefault();
+      const naam = document.getElementById('f-naam').value.trim();
+      const lnr  = document.getElementById('f-lnr').value.trim();
+      const bericht = document.getElementById('f-bericht').value.trim();
+      if (!naam || !lnr || !bericht) return;
+      messages.push({ id: Date.now()+'-'+Math.random().toString(36).slice(2), naam, lnr, bericht,
+        ts: new Date().toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' }), read: false });
+      save(KEY_M, messages);
+      document.getElementById('msg-form').reset();
+      document.body.classList.add('flashing');
+      setTimeout(() => document.body.classList.remove('flashing'), 2000);
+      renderRightPanel(); toast('✅ BERICHT VERSTUURD!');
+    }
+
+    // ── Admin tabs ────────────────────────────────────────────
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('tab-inbox').classList.toggle('active',   tab === 'inbox');
+      document.getElementById('tab-archief').classList.toggle('active', tab === 'archief');
+      document.getElementById('clear-all').textContent = tab === 'inbox' ? 'Alles wissen' : 'Archief legen';
+      renderAdminMessages();
+    }
+    function renderAdminMessages() {
+      const list = document.getElementById('msgs-list');
+      const badge = document.getElementById('unread-badge');
+      const unread = messages.filter(m => !m.read).length;
+      badge.textContent = unread > 0 ? unread+' NIEUW' : ''; badge.classList.toggle('visible', unread > 0);
+      if (activeTab === 'inbox') {
+        if (!messages.length) { list.innerHTML = '<div class="msg-empty">GEEN BERICHTEN</div>'; return; }
+        list.innerHTML = messages.slice().reverse().map(m => `
+          <div class="admin-msg-card ${m.read?'':'unread'}">
+            <div class="admin-msg-meta"><strong>${esc(m.naam)}</strong><span>📋 ${esc(m.lnr)}</span><span>🕐 ${esc(m.ts)}</span></div>
+            <div class="admin-msg-body">${esc(m.bericht)}</div>
+            <div class="admin-msg-actions">
+              <button class="msg-btn msg-btn-archive"  onclick="archiveMsg('${esc(m.id)}')">📦 ARCHIVEREN</button>
+              <button class="msg-btn msg-btn-delete"   onclick="deleteMsg('${esc(m.id)}')">🗑️ VERWIJDEREN</button>
+            </div>
+          </div>`).join('');
+        messages = messages.map(m => ({...m, read:true})); save(KEY_M, messages);
+        renderRightPanel(); badge.classList.remove('visible');
+      } else {
+        list.innerHTML = !archived.length ? '<div class="msg-empty">ARCHIEF IS LEEG</div>'
+          : archived.slice().reverse().map(m => `
+            <div class="admin-msg-card archived">
+              <div class="admin-msg-meta"><strong>${esc(m.naam)}</strong><span>📋 ${esc(m.lnr)}</span><span>🕐 ${esc(m.ts)}</span></div>
+              <div class="admin-msg-body">${esc(m.bericht)}</div>
+              <div class="admin-msg-actions">
+                <button class="msg-btn msg-btn-unarchive" onclick="unarchiveMsg('${esc(m.id)}')">↩️ TERUGPLAATSEN</button>
+                <button class="msg-btn msg-btn-delete"    onclick="deleteArchived('${esc(m.id)}')">🗑️ VERWIJDEREN</button>
+              </div>
+            </div>`).join('');
+      }
+    }
+    function archiveMsg(id) {
+      const i = messages.findIndex(m => m.id === id); if (i<0) return;
+      archived.push({...messages[i], read:true}); messages.splice(i,1);
+      save(KEY_M,messages); save(KEY_A,archived); renderAdminMessages(); renderRightPanel(); toast('📦 GEARCHIVEERD');
+    }
+    function deleteMsg(id) {
+      messages = messages.filter(m => m.id !== id); save(KEY_M,messages);
+      renderAdminMessages(); renderRightPanel(); toast('🗑️ VERWIJDERD');
+    }
+    function unarchiveMsg(id) {
+      const i = archived.findIndex(m => m.id === id); if (i<0) return;
+      messages.push({...archived[i], read:true}); archived.splice(i,1);
+      save(KEY_M,messages); save(KEY_A,archived); renderAdminMessages(); renderRightPanel(); toast('↩️ TERUG IN INBOX');
+    }
+    function deleteArchived(id) {
+      archived = archived.filter(m => m.id !== id); save(KEY_A,archived);
+      renderAdminMessages(); toast('🗑️ VERWIJDERD UIT ARCHIEF');
+    }
+    function clearAll() {
+      if (activeTab==='inbox') {
+        if (!confirm('Alle berichten verwijderen?')) return;
+        messages=[]; save(KEY_M,messages); renderRightPanel(); toast('🗑️ INBOX GEWIST');
+      } else {
+        if (!confirm('Archief verwijderen?')) return;
+        archived=[]; save(KEY_A,archived); toast('🗑️ ARCHIEF GEWIST');
+      }
+      renderAdminMessages();
+    }
+
+    // ── PIN ──────────────────────────────────────────────────
+    function openPin()  { pinBuffer=''; updateDots(); document.getElementById('pin-overlay').classList.add('visible'); }
+    function closePin() { pinBuffer=''; updateDots(); document.getElementById('pin-overlay').classList.remove('visible'); }
+    function handlePinKey(k) {
+      if (k==='cancel') { closePin(); return; }
+      if (k==='del') pinBuffer=pinBuffer.slice(0,-1);
+      else if (pinBuffer.length<4) pinBuffer+=k;
+      updateDots();
+      if (pinBuffer.length===4) setTimeout(checkPin,180);
+    }
+    function checkPin() {
+      if (pinBuffer===load(KEY_P,DEFAULT_PIN)) { closePin(); openAdmin(); }
+      else {
+        const dots = document.getElementById('pin-dots');
+        document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
+        dots.classList.add('shake');
+        setTimeout(()=>{ dots.classList.remove('shake'); document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('error')); pinBuffer=''; updateDots(); },600);
+      }
+    }
+    function updateDots() { document.querySelectorAll('.pin-dot').forEach((d,i)=>d.classList.toggle('filled',i<pinBuffer.length)); }
+    function openAdmin()  { activeTab='inbox'; switchTab('inbox'); document.getElementById('admin-panel').classList.add('visible'); }
+    function closeAdmin() { document.getElementById('admin-panel').classList.remove('visible'); }
+
+    // ── FAQ — categorised decision tree ──────────────────────
+    const FAQ_CATS = [
+      {
+        icon: '🎒', naam: 'LEERLINGEN',
+        kleur: 'rgba(59,130,246,0.16)', rand: 'rgba(59,130,246,0.45)',
+        vragen: [
+          { icon: '🖥️', vraag: 'Mijn Chromebook start niet op, is traag of doet raar.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> van de ICT Desk.\n\nHij kijkt naar het probleem en repareert of vervangt je Chromebook indien nodig.' },
+          { icon: '🔒', vraag: 'Ik kan niet inloggen op mijn Chromebook.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> van de ICT Desk.\n\nHij kan je account herstellen en je weer aan de slag krijgen.' },
+          { icon: '🌐', vraag: 'Ik heb geen internet op mijn Chromebook.',
+            antwoord: 'Controleer eerst of je verbonden bent met <strong>Dalton-Leerling</strong> of <strong>Dalton-Leerling-Xtra</strong>.\n\nWordt het probleem niet opgelost? <strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.' },
+          { icon: '🔑', vraag: 'Ik kom niet in SOMtoday of ben mijn wachtwoord vergeten.',
+            antwoord: '<strong>Ga naar Meneer Burema</strong> voor hulp met SOMtoday-toegang en accountproblemen als leerling.' },
+          { icon: '📱', vraag: 'Een app of extensie werkt niet op mijn Chromebook.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nVermeld welke app of extensie het betreft en wat er misgaat.' },
+          { icon: '📦', vraag: 'Ik wil een laptop lenen.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> van de ICT Desk.\n\nHij beheert de uitleenlaptops en helpt je direct verder.' },
+          { icon: '🖨️', vraag: 'Ik wil iets 3D printen.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nHij begeleidt 3D-printopdrachten en plant dit in wanneer de printer beschikbaar is.' },
+        ]
+      },
+      {
+        icon: '👩‍🏫', naam: 'MEDEWERKERS',
+        kleur: 'rgba(139,92,246,0.16)', rand: 'rgba(139,92,246,0.45)',
+        vragen: [
+          { icon: '🖥️', vraag: 'Ik heb een probleem met mijn Windows-pc of laptop.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nOmschrijf het probleem zo duidelijk mogelijk zodat hij goed voorbereid is.' },
+          { icon: '🔐', vraag: 'Mijn wachtwoord werkt niet of mijn account is geblokkeerd.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nHij kan accounts herstellen en wachtwoorden resetten.' },
+          { icon: '📧', vraag: 'Mijn e-mail of Microsoft Teams werkt niet.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nVermeld welk programma niet werkt en wat er precies misgaat.' },
+          { icon: '📺', vraag: 'Het smartboard in mijn lokaal doet het niet.',
+            antwoord: '<strong>Vraag bij de administratie</strong> om Meneer Faro te bellen.\n\nHij komt dan langs om het smartboard te controleren en te repareren.' },
+          { icon: '🔑', vraag: 'Ik heb een SOMtoday-probleem als medewerker.',
+            antwoord: '<strong>Ga naar de administratie of Meneer Burema</strong> voor SOMtoday-gerelateerde problemen als medewerker.' },
+          { icon: '💾', vraag: 'Ik heb een softwareprogramma of licentie nodig.',
+            antwoord: '<strong>Stuur een mail naar ictdesk@daltondenhaag.nl</strong> met een omschrijving van welke software je nodig hebt en waarvoor.\n\nOf wacht op Meneer Faro voor directe hulp.' },
+        ]
+      },
+      {
+        icon: '📅', naam: 'RESERVEREN',
+        kleur: 'rgba(34,197,94,0.16)', rand: 'rgba(34,197,94,0.45)',
+        vragen: [
+          { icon: '🎙️', vraag: 'Ik wil de Podcast ruimte reserveren.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nGeef in je mail aan wanneer je de ruimte wilt gebruiken en voor welk doel.' },
+          { icon: '🖥️', vraag: 'Ik wil een pc of computer reserveren.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nVermeld hoeveel pc\'s je nodig hebt, op welke datum en hoe laat.' },
+          { icon: '💻', vraag: 'Ik wil laptops reserveren voor een klas of activiteit.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nVermeld het aantal laptops, de datum en het tijdstip.' },
+        ]
+      },
+      {
+        icon: '🛠️', naam: 'APPARATUUR & SOFTWARE',
+        kleur: 'rgba(251,146,60,0.16)', rand: 'rgba(251,146,60,0.45)',
+        vragen: [
+          { icon: '🖨️', vraag: 'De printer werkt niet.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> van de ICT Desk.\n\nHij kan printerproblemen oplossen of de printer opnieuw instellen.' },
+          { icon: '🌐', vraag: 'Er is geen internet of netwerkverbinding.',
+            antwoord: 'Controleer het juiste netwerk:\n• <strong>Leerlingen</strong>: Dalton-Leerling of Dalton-Leerling-Xtra\n• <strong>Medewerkers</strong>: Dalton-Medewerker of Dalton-BYD-Medewerkers\n• <strong>Gasten</strong>: Dalton-Guest\n\nNog steeds geen verbinding? <strong>Wacht op Meneer Faro</strong> of mail <strong>ictdesk@daltondenhaag.nl</strong>.' },
+          { icon: '🖨️', vraag: 'Ik wil iets 3D printen.',
+            antwoord: '<strong>Wacht op Meneer Faro</strong> of stuur een mail naar <strong>ictdesk@daltondenhaag.nl</strong>.\n\nHij begeleidt 3D-printopdrachten en plant dit in wanneer de printer beschikbaar is.' },
+          { icon: '💾', vraag: 'Ik heb een software-update of nieuw programma nodig.',
+            antwoord: '<strong>Stuur een mail naar ictdesk@daltondenhaag.nl</strong> met een beschrijving van de gewenste software.\n\nOf wacht op Meneer Faro voor directe hulp.' },
+        ]
+      },
+    ];
+
+    let currentFaqCat = null;
+
+    function openFaq() {
+      currentFaqCat = null;
+      showFaqCategories();
+      document.getElementById('faq-overlay').classList.add('visible');
+    }
+    function closeFaq() {
+      document.getElementById('faq-overlay').classList.remove('visible');
+    }
+    function showFaqCategories() {
+      currentFaqCat = null;
+      const list = document.getElementById('faq-list');
+      list.hidden = false;
+      document.getElementById('faq-answer').hidden = true;
+      list.classList.add('cat-grid');
+      list.innerHTML = '<div class="faq-section-label faq-section-full">Kies een categorie</div>' +
+        FAQ_CATS.map((cat, i) => `
+          <div class="faq-cat-card" onclick="showFaqQuestions(${i})"
+               style="--cat-kleur:${cat.kleur};--cat-rand:${cat.rand}">
+            <span class="faq-q-icon">${cat.icon}</span>
+            <span class="faq-q-text">${cat.naam}</span>
+            <span class="faq-q-arrow">›</span>
+          </div>`).join('');
+    }
+    function showFaqQuestions(catIdx) {
+      currentFaqCat = catIdx;
+      const cat = FAQ_CATS[catIdx];
+      const list = document.getElementById('faq-list');
+      list.hidden = false;
+      list.classList.remove('cat-grid');
+      document.getElementById('faq-answer').hidden = true;
+      list.innerHTML =
+        `<button class="faq-back-btn faq-back-inline" onclick="showFaqCategories()">← TERUG</button>
+         <div class="faq-section-label">${cat.icon} ${cat.naam}</div>` +
+        cat.vragen.map((v, i) => `
+          <div class="faq-q-card" onclick="showFaqAnswer(${catIdx},${i})">
+            <span class="faq-q-icon">${v.icon}</span>
+            <span class="faq-q-text">${esc(v.vraag)}</span>
+            <span class="faq-q-arrow">›</span>
+          </div>`).join('');
+    }
+    function showFaqAnswer(catIdx, qIdx) {
+      currentFaqCat = catIdx;
+      const f = FAQ_CATS[catIdx].vragen[qIdx];
+      document.getElementById('faq-list').hidden = true;
+      document.getElementById('faq-answer-icon').textContent = f.icon;
+      document.getElementById('faq-answer-text').innerHTML = f.antwoord.replace(/\n/g, '<br>');
+      document.getElementById('faq-answer').hidden = false;
+    }
+    function showFaqList() {
+      currentFaqCat !== null ? showFaqQuestions(currentFaqCat) : showFaqCategories();
+    }
+
+    document.getElementById('faq-overlay').addEventListener('pointerdown', e => {
+      if (e.target === document.getElementById('faq-overlay')) closeFaq();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && document.getElementById('faq-overlay').classList.contains('visible')) closeFaq();
+    });
+
+    function save(k,v)  { try { localStorage.setItem(k,JSON.stringify(v)); } catch(_){} }
+    function load(k,fb) { try { const v=localStorage.getItem(k); return v!==null?JSON.parse(v):fb; } catch(_){ return fb; } }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function toast(msg) {
+      clearTimeout(toastTimer);
+      const el=document.getElementById('toast');
+      el.textContent=msg; el.classList.add('show');
+      toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+    }
+  </script>
+</body>
+</html>
