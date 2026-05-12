@@ -281,13 +281,40 @@
     }
     #open-screen-text {
       font-family: 'Bebas Neue', var(--font);
-      font-size: clamp(3rem, 8vw, 6.5rem);
-      letter-spacing: 0.28em;
-      margin-right: -0.28em;
+      font-size: clamp(2.2rem, 6vw, 5rem);
+      letter-spacing: 0.18em;
+      margin-right: -0.18em;
       color: rgba(255,255,255,0.96);
-      line-height: 1.15;
+      line-height: 1.2;
       text-shadow: 0 4px 48px rgba(0,0,0,0.20);
     }
+
+    /* ── Deurbel knop ── */
+    #doorbell-btn {
+      margin-top: 0.5rem;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.55rem;
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.35);
+      border-radius: 24px;
+      padding: 1.1rem 2.2rem;
+      color: #fff; cursor: pointer;
+      font-family: var(--font);
+      transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    }
+    #doorbell-btn:hover  { background: rgba(255,255,255,0.22); box-shadow: 0 6px 28px rgba(0,0,0,0.28); }
+    #doorbell-btn:active { transform: scale(0.94); }
+    #doorbell-btn.ringing { animation: bell-shake 0.5s ease; }
+    @keyframes bell-shake {
+      0%,100% { transform: rotate(0deg); }
+      20%     { transform: rotate(-12deg) scale(1.06); }
+      40%     { transform: rotate(14deg) scale(1.08); }
+      60%     { transform: rotate(-10deg) scale(1.06); }
+      80%     { transform: rotate(8deg); }
+    }
+    #doorbell-icon { font-size: clamp(2.8rem, 7vw, 4.5rem); line-height: 1; }
+    #doorbell-label { font-size: clamp(0.82rem, 1.6vw, 1.1rem); letter-spacing: 0.18em; opacity: 0.85; }
 
     #right-title {
       font-size: clamp(1.1rem, 2.2vw, 1.6rem);
@@ -693,7 +720,11 @@
   <!-- OPEN welcome — below slider, replaces panel grid -->
   <div id="open-screen">
     <div id="open-screen-emoji">😊</div>
-    <div id="open-screen-text">KOM GERUST<br>BINNEN</div>
+    <div id="open-screen-text">LAAT EVEN WETEN<br>DAT JE ER BENT</div>
+    <button id="doorbell-btn" onclick="ringDoorbell()" aria-label="Deurbel">
+      <span id="doorbell-icon">🔔</span>
+      <span id="doorbell-label">DRUK OP DE BEL</span>
+    </button>
   </div>
 
   <!-- 2-column grid (GESLOTEN only) -->
@@ -1125,6 +1156,41 @@
       const el=document.getElementById('toast');
       el.textContent=msg; el.classList.add('show');
       toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+    }
+
+    // ── Deurbel ──────────────────────────────────────────────
+    let bellCtx = null;
+    function getDingCtx() {
+      if (!bellCtx) bellCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return bellCtx;
+    }
+    function playTone(ctx, freq, startT, dur, vol) {
+      const osc  = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startT);
+      gain.gain.setValueAtTime(vol, startT);
+      gain.gain.exponentialRampToValueAtTime(0.001, startT + dur);
+      osc.start(startT);
+      osc.stop(startT + dur);
+    }
+    function ringDoorbell() {
+      const ctx = getDingCtx();
+      const now = ctx.currentTime;
+      // Ding: E5 (659Hz) + overtoon
+      playTone(ctx, 659, now,        1.1, 0.55);
+      playTone(ctx, 1318, now,       0.6, 0.18);
+      // Dong: B4 (494Hz) + overtoon, iets later
+      playTone(ctx, 494, now + 0.55, 1.4, 0.50);
+      playTone(ctx, 988, now + 0.55, 0.8, 0.14);
+      // Bel-animatie
+      const btn = document.getElementById('doorbell-btn');
+      btn.classList.remove('ringing');
+      void btn.offsetWidth;
+      btn.classList.add('ringing');
+      setTimeout(() => btn.classList.remove('ringing'), 500);
+      toast('🔔 BEL GEGAAN!');
     }
   </script>
 </body>
