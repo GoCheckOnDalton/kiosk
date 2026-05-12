@@ -280,11 +280,10 @@
       position: absolute;
       right: 0; top: 0; bottom: 0;
       height: 100%; width: auto;
-      opacity: 0.18;
+      opacity: 0.22;
       pointer-events: none;
       z-index: 0;
       transition: left 0.6s ease, right 0.6s ease;
-      border-radius: inherit;
       object-fit: cover;
     }
     body.status-open #slider-bg-gif {
@@ -294,10 +293,17 @@
     }
 
     /* ── Mini Piano ── */
+    #piano-label {
+      font-family: 'Barlow Condensed', var(--font);
+      font-size: clamp(1.1rem, 2.2vh, 1.6rem);
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.70);
+      text-align: center;
+    }
     #mini-piano {
       position: relative;
       display: flex;
-      width: min(94vw, 1160px);
+      width: min(94vw, 620px);
       height: clamp(120px, 19vh, 185px);
       user-select: none; touch-action: none;
       filter: drop-shadow(0 6px 28px rgba(0,0,0,0.40));
@@ -736,6 +742,7 @@
 
   <!-- OPEN welcome — below slider, replaces panel grid -->
   <div id="open-screen">
+    <div id="piano-label">Speel wat voor aandacht.</div>
     <div id="mini-piano" role="group" aria-label="Mini piano — speel een nootje!"></div>
   </div>
 
@@ -1180,23 +1187,35 @@
     function playPianoNote(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
-      const gain = ctx.createGain();
-      gain.connect(ctx.destination);
-      // Grondtoon (triangle = zachte piano-ish klank)
+      const f = freq * 1.5; // anderhalf octaaf hoger: helder maar niet schel
+
+      // Low-pass filter om hoge harmonischen af te knippen
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = f * 6;
+      filter.Q.value = 0.8;
+      filter.connect(ctx.destination);
+
+      // Grondtoon — sine: zacht, geen harde harmonischen
       const o1 = ctx.createOscillator();
-      o1.type = 'triangle'; o1.frequency.value = freq;
-      o1.connect(gain);
-      // Eerste boventoon (zachter)
+      const g1 = ctx.createGain();
+      o1.type = 'sine'; o1.frequency.value = f;
+      o1.connect(g1); g1.connect(filter);
+      g1.gain.setValueAtTime(0.0001, now);
+      g1.gain.linearRampToValueAtTime(0.50, now + 0.010);
+      g1.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+
+      // Sub-octaaf voor warmte/bas
       const o2 = ctx.createOscillator();
-      o2.type = 'sine'; o2.frequency.value = freq * 2;
-      const g2 = ctx.createGain(); g2.gain.value = 0.18;
-      o2.connect(g2); g2.connect(ctx.destination);
-      // Envelop: snelle attack, exponentieel decay
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(0.45, now + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
-      o1.start(now); o1.stop(now + 1.6);
-      o2.start(now); o2.stop(now + 1.6);
+      const g2 = ctx.createGain();
+      o2.type = 'sine'; o2.frequency.value = f / 2;
+      o2.connect(g2); g2.connect(filter);
+      g2.gain.setValueAtTime(0.0001, now);
+      g2.gain.linearRampToValueAtTime(0.20, now + 0.012);
+      g2.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+      o1.start(now); o1.stop(now + 2.4);
+      o2.start(now); o2.stop(now + 1.8);
     }
 
     const PIANO_NOTES = [
@@ -1207,14 +1226,7 @@
       { freq:392.00,black:false },{ freq:415.30,black:true,  pos:5  },
       { freq:440.00,black:false },{ freq:466.16,black:true,  pos:6  },
       { freq:493.88,black:false },
-      { freq:523.25,black:false },{ freq:554.37,black:true,  pos:8  },
-      { freq:587.33,black:false },{ freq:622.25,black:true,  pos:9  },
-      { freq:659.25,black:false },
-      { freq:698.46,black:false },{ freq:739.99,black:true,  pos:11 },
-      { freq:783.99,black:false },{ freq:830.61,black:true,  pos:12 },
-      { freq:880.00,black:false },{ freq:932.33,black:true,  pos:13 },
-      { freq:987.77,black:false },
-      { freq:1046.5,black:false },
+      { freq:523.25,black:false },
     ];
 
     function buildPiano() {
