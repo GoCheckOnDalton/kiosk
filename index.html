@@ -1432,7 +1432,7 @@
       const env = ctx.createGain();
       env.connect(ctx.destination);
       env.gain.setValueAtTime(0.001, now);
-      env.gain.linearRampToValueAtTime(0.10, now + 0.06);
+      env.gain.linearRampToValueAtTime(0.15, now + 0.06);
 
       const filt = ctx.createBiquadFilter();
       filt.type = 'lowpass'; filt.Q.value = 2.2;
