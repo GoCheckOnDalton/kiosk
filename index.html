@@ -271,95 +271,103 @@
       display: none;
       flex: 1; min-height: 0;
       flex-direction: column;
-      align-items: center; justify-content: flex-start;
+      align-items: stretch;
       gap: 0.4rem;
       position: relative; z-index: 1;
-      padding: 0.3rem 1.5rem 0.5rem;
+      padding: 0.4rem 1.5rem 0.5rem;
+    }
+
+    /* ── Step Sequencer ── */
+    #seq-area { display: flex; flex-direction: column; gap: 0.32rem; flex-shrink: 0; }
+    #seq-transport { display: flex; flex-direction: row; align-items: center; gap: 0.65rem; }
+    #seq-play {
+      padding: 0.36rem 1.1rem;
+      background-image: linear-gradient(to right, #1CD8D2 0%, #93EDC7 51%, #1CD8D2 100%);
+      background-size: 200% auto; background-position: left center;
+      border: none; border-radius: 8px; color: #fff;
+      font-family: var(--font); font-size: 1rem; letter-spacing: 0.10em;
+      cursor: pointer; transition: background-position 0.5s, transform 0.08s;
+    }
+    #seq-play:hover  { background-position: right center; }
+    #seq-play.playing { background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%); }
+    #seq-play:active { transform: scale(0.93); }
+    #seq-bpm-wrap {
+      display: flex; align-items: center; gap: 0.32rem;
+      font-family: var(--font); color: rgba(255,255,255,0.85);
+    }
+    #seq-bpm-val { font-size: 1.1rem; font-weight: 700; min-width: 2.5ch; text-align: center; }
+    .seq-lbl { font-size: 0.68rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.38); }
+    .seq-ctrl-btn {
+      width: 26px; height: 26px; border-radius: 6px;
+      background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.22);
+      color: #fff; font-size: 1rem; line-height: 1; cursor: pointer; padding: 0;
+      transition: background 0.10s;
+    }
+    .seq-ctrl-btn:hover { background: rgba(255,255,255,0.22); }
+    #seq-clear {
+      padding: 0.26rem 0.65rem;
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 8px; color: rgba(255,255,255,0.50);
+      font-family: var(--font); font-size: 0.78rem; letter-spacing: 0.08em;
+      cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    #seq-clear:hover { background: rgba(220,60,60,0.25); color: #fff; }
+    #seq-grid  { display: flex; flex-direction: column; gap: 0.24rem; }
+    .seq-row   { display: flex; flex-direction: row; align-items: center; gap: 0.18rem; }
+    .seq-track-label {
+      width: 52px; flex-shrink: 0;
+      font-family: var(--font); font-size: 0.60rem; letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.40); text-align: right; padding-right: 5px;
+    }
+    .seq-step {
+      flex: 1; height: clamp(26px, 4.2vh, 40px);
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 4px; cursor: pointer; padding: 0;
+      transition: background 0.05s, box-shadow 0.05s;
+    }
+    .seq-step.g4 { margin-left: 4px; }
+    .seq-step.on {
+      background: var(--sc); border-color: transparent;
+      box-shadow: 0 0 7px 1px var(--sc);
+    }
+    .seq-step.head { outline: 2.5px solid rgba(255,255,255,0.82); outline-offset: -2px; }
+    .seq-step.on.head { filter: brightness(1.35); }
+
+    /* ── Piano (lead) ── */
+    #piano-area {
+      display: flex; flex-direction: column;
+      align-items: center; flex: 1; min-height: 0;
+      justify-content: flex-end; gap: 0.25rem; padding-bottom: 0.15rem;
     }
     #piano-label {
       font-family: 'Barlow Condensed', var(--font);
-      font-size: clamp(1rem, 2vh, 1.5rem);
-      letter-spacing: 0.14em; color: rgba(255,255,255,0.65);
-      flex-shrink: 0; align-self: flex-start; padding-left: 0.2rem;
+      font-size: clamp(0.85rem, 1.8vh, 1.25rem);
+      letter-spacing: 0.12em; color: rgba(255,255,255,0.58); text-align: center; flex-shrink: 0;
     }
-    #open-screen-row {
-      display: flex; flex-direction: row;
-      align-items: flex-end; justify-content: center;
-      gap: 1.4rem; flex: 1; min-height: 0; width: 100%;
+    #mini-piano {
+      position: relative; display: flex;
+      width: 100%; height: clamp(110px, 18vh, 175px);
+      user-select: none; touch-action: none;
+      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.40));
     }
-    #piano-area {
-      display: flex; flex-direction: column;
-      align-items: flex-start;
-      flex-shrink: 0;
+    .piano-white {
+      flex: 1;
+      background: linear-gradient(to bottom, #f0ece0, #e8e4d4);
+      border: 1.5px solid #666; border-top: 2.5px solid #555;
+      border-radius: 0 0 10px 10px; cursor: pointer;
+      position: relative; z-index: 1; transition: background 0.06s;
+      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.18);
     }
-    #beat-area {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 0.45rem;
-      flex-shrink: 0;
+    .piano-white.active { background: linear-gradient(to bottom, #b8d8f8, #90c0f0); }
+    .piano-white:first-child { border-radius: 0 0 10px 10px; }
+    .piano-black {
+      position: absolute; top: 0; height: 62%;
+      background: linear-gradient(to bottom, #1a1a22, #2c2c38);
+      border-radius: 0 0 7px 7px; z-index: 2; cursor: pointer;
+      transform: translateX(-50%); transition: background 0.06s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(255,255,255,0.07);
     }
-    #beat-label {
-      font-family: var(--font); font-size: clamp(0.65rem, 1.2vh, 0.85rem);
-      letter-spacing: 0.22em; color: rgba(255,255,255,0.40);
-    }
-    #beat-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 0.4rem; width: min(38vw, 480px);
-    }
-    .beat-btn {
-      height: clamp(72px, 13vh, 120px);
-      border-radius: 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid rgba(255,255,255,0.16);
-      color: rgba(255,255,255,0.72);
-      font-family: var(--font); font-size: clamp(0.55rem, 1.1vw, 0.82rem);
-      letter-spacing: 0.10em; cursor: pointer;
-      transition: background 0.08s, transform 0.06s, box-shadow 0.08s;
-      touch-action: none;
-    }
-    .beat-btn.flash {
-      transform: scale(0.90);
-      box-shadow: 0 0 20px 6px var(--bc, rgba(255,255,255,0.35));
-      background: rgba(255,255,255,0.22);
-    }
-    /* ── PITCH knop — wit + fluoriserend paars ── */
-    #pitch-area {
-      display: flex; flex-direction: column;
-      align-items: center; gap: 0.6rem;
-      flex-shrink: 0; align-self: center;
-    }
-    #knob-pitch {
-      width: clamp(90px, 14vh, 120px); height: clamp(90px, 14vh, 120px);
-      border-radius: 50%;
-      background: radial-gradient(circle at 38% 32%, #ffffff, #d8d0f0);
-      border: 3px solid rgba(180,80,255,0.70);
-      position: relative; cursor: ns-resize;
-      box-shadow: 0 0 18px 5px rgba(170,60,255,0.50), 0 0 40px 12px rgba(130,40,220,0.25),
-                  inset 0 1px 3px rgba(255,255,255,0.90);
-      touch-action: none; user-select: none;
-      animation: pitch-pulse 2.8s ease-in-out infinite;
-    }
-    @keyframes pitch-pulse {
-      0%,100% { box-shadow: 0 0 18px 5px rgba(170,60,255,0.50), 0 0 40px 12px rgba(130,40,220,0.25), inset 0 1px 3px rgba(255,255,255,0.90); }
-      50%     { box-shadow: 0 0 28px 10px rgba(190,80,255,0.70), 0 0 60px 20px rgba(150,50,240,0.38), inset 0 1px 3px rgba(255,255,255,0.90); }
-    }
-    #knob-pitch .knob-dot {
-      width: 4px; height: 36%;
-      background: rgba(140,40,220,0.90);
-      box-shadow: 0 0 6px 2px rgba(180,80,255,0.70);
-    }
-    .knob-label {
-      font-family: var(--font); font-size: clamp(0.65rem, 1.2vh, 0.85rem);
-      letter-spacing: 0.22em; color: rgba(200,160,255,0.80);
-    }
-    .knob-dot {
-      position: absolute; top: 10%; left: 50%;
-      width: 3px; height: 32%;
-      background: rgba(255,255,255,0.88);
-      border-radius: 2px;
-      transform-origin: bottom center;
-      transform: translateX(-50%) rotate(-135deg);
-      pointer-events: none;
-    }
+    .piano-black.active { background: linear-gradient(to bottom, #2a4a7a, #3a6aaa); }
     /* ── Slider PIN overlay ── */
     #spo {
       position: fixed; inset: 0; z-index: 150;
@@ -434,49 +442,6 @@
     body.status-open  #slider-gif-closed { display: none; }
     body.status-open  #slider-gif-open   { display: block; }
 
-    /* ── Mini Piano ── */
-    #piano-label {
-      font-family: 'Barlow Condensed', var(--font);
-      font-size: clamp(1.1rem, 2.2vh, 1.6rem);
-      letter-spacing: 0.12em;
-      color: rgba(255,255,255,0.70);
-      text-align: center;
-    }
-    #mini-piano {
-      position: relative;
-      display: flex;
-      width: min(50vw, 680px);
-      height: clamp(160px, 26vh, 240px);
-      user-select: none; touch-action: none;
-      filter: drop-shadow(0 6px 28px rgba(0,0,0,0.40));
-    }
-    .piano-white {
-      flex: 1;
-      background: linear-gradient(to bottom, #f0ece0, #e8e4d4);
-      border: 1.5px solid #666;
-      border-top: 2.5px solid #555;
-      border-radius: 0 0 10px 10px;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      transition: background 0.06s;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.18);
-    }
-    .piano-white.active { background: linear-gradient(to bottom, #b8d8f8, #90c0f0); }
-    .piano-white:first-child { border-radius: 0 0 10px 10px; }
-    .piano-black {
-      position: absolute;
-      top: 0;
-      height: 62%;
-      background: linear-gradient(to bottom, #1a1a22, #2c2c38);
-      border-radius: 0 0 7px 7px;
-      z-index: 2;
-      cursor: pointer;
-      transform: translateX(-50%);
-      transition: background 0.06s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(255,255,255,0.07);
-    }
-    .piano-black.active { background: linear-gradient(to bottom, #2a4a7a, #3a6aaa); }
 
     #right-title {
       font-size: clamp(1.1rem, 2.2vw, 1.6rem);
@@ -925,30 +890,24 @@
     </div>
   </div>
 
-  <!-- OPEN welcome — below slider, replaces panel grid -->
+  <!-- OPEN welcome — step sequencer + piano lead -->
   <div id="open-screen">
-    <div id="piano-label">Speel wat voor aandacht.</div>
-    <div id="open-screen-row">
-      <div id="piano-area">
-        <div id="mini-piano" role="group" aria-label="Mini piano"></div>
-      </div>
-      <div id="beat-area">
-        <div id="beat-label">BEATPAD</div>
-        <div id="beat-grid">
-          <button class="beat-btn" data-sound="kick"   style="--bc:rgba(239,68,68,0.6)">KICK</button>
-          <button class="beat-btn" data-sound="snare"  style="--bc:rgba(234,179,8,0.6)">SNARE</button>
-          <button class="beat-btn" data-sound="hihat"  style="--bc:rgba(34,197,94,0.6)">HI-HAT</button>
-          <button class="beat-btn" data-sound="clap"   style="--bc:rgba(249,115,22,0.6)">CLAP</button>
-          <button class="beat-btn" data-sound="tom"    style="--bc:rgba(139,92,246,0.6)">TOM</button>
-          <button class="beat-btn" data-sound="openhi" style="--bc:rgba(6,182,212,0.6)">OPEN HH</button>
-          <button class="beat-btn" data-sound="crash"  style="--bc:rgba(236,72,153,0.6)">CRASH</button>
-          <button class="beat-btn" data-sound="rim"    style="--bc:rgba(168,162,158,0.6)">RIM</button>
+    <div id="seq-area">
+      <div id="seq-transport">
+        <button id="seq-play">▶ PLAY</button>
+        <div id="seq-bpm-wrap">
+          <button class="seq-ctrl-btn" id="seq-bpm-dn">−</button>
+          <span id="seq-bpm-val">120</span>
+          <span class="seq-lbl">BPM</span>
+          <button class="seq-ctrl-btn" id="seq-bpm-up">+</button>
         </div>
+        <button id="seq-clear">⌫ CLEAR</button>
       </div>
-      <div id="pitch-area">
-        <div id="knob-pitch" data-val="0.5"><div class="knob-dot"></div></div>
-        <span class="knob-label">PITCH</span>
-      </div>
+      <div id="seq-grid"></div>
+    </div>
+    <div id="piano-area">
+      <div id="piano-label">Speel een lead melody op de beat.</div>
+      <div id="mini-piano" role="group" aria-label="Mini piano"></div>
     </div>
   </div>
 
@@ -1444,16 +1403,10 @@
       return audioCtx;
     }
 
-    function getKnobVal(id) {
-      const k = document.getElementById(id);
-      return k ? parseFloat(k.dataset.val) : 0.5;
-    }
-
     function playPianoNote(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
-      const pitch = 0.5 + getKnobVal('knob-pitch') * 1.5; // 0.5x – 2.0x
-      const f = freq * 1.5 * pitch;
+      const f = freq * 1.5;
 
       const master = ctx.createGain();
       master.connect(ctx.destination);
@@ -1529,7 +1482,7 @@
 
     buildPiano();
 
-    // ── Beat Pad ─────────────────────────────────────────────
+    // ── Drum sounds ──────────────────────────────────────────
     function makeNoiseBuf(ctx, dur) {
       const n = Math.floor(ctx.sampleRate * dur);
       const buf = ctx.createBuffer(1, n, ctx.sampleRate);
@@ -1540,21 +1493,21 @@
 
     const BEAT = {
       kick: ctx => {
-        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const now = ctx.currentTime;
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type = 'sine';
-        o.frequency.setValueAtTime(160*p, now); o.frequency.exponentialRampToValueAtTime(35*p, now+0.45);
+        o.frequency.setValueAtTime(160, now); o.frequency.exponentialRampToValueAtTime(35, now+0.45);
         g.gain.setValueAtTime(1.2, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
         o.start(now); o.stop(now+0.5);
       },
       snare: ctx => {
-        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const now = ctx.currentTime;
         const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.25);
         const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=2200; nf.Q.value=0.9;
         const ng = ctx.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
         ng.gain.setValueAtTime(0.9, now); ng.gain.exponentialRampToValueAtTime(0.001, now+0.22);
         const o = ctx.createOscillator(), og = ctx.createGain();
-        o.type='triangle'; o.frequency.value=190*p; o.connect(og); og.connect(ctx.destination);
+        o.type='triangle'; o.frequency.value=190; o.connect(og); og.connect(ctx.destination);
         og.gain.setValueAtTime(0.45, now); og.gain.exponentialRampToValueAtTime(0.001, now+0.12);
         ns.start(now); ns.stop(now+0.25); o.start(now); o.stop(now+0.12);
       },
@@ -1577,64 +1530,110 @@
         });
       },
       tom: ctx => {
-        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const now = ctx.currentTime;
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type='sine';
-        o.frequency.setValueAtTime(110*p, now); o.frequency.exponentialRampToValueAtTime(55*p, now+0.35);
+        o.frequency.setValueAtTime(110, now); o.frequency.exponentialRampToValueAtTime(55, now+0.35);
         g.gain.setValueAtTime(0.9, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
         o.start(now); o.stop(now+0.4);
       },
-      openhi: ctx => {
-        const now = ctx.currentTime;
-        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.55);
-        const f = ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000;
-        const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.45, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
-        ns.start(now); ns.stop(now+0.55);
-      },
-      crash: ctx => {
-        const now = ctx.currentTime;
-        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 1.4);
-        const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=4800; f.Q.value=0.3;
-        const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.75, now); g.gain.exponentialRampToValueAtTime(0.001, now+1.4);
-        ns.start(now); ns.stop(now+1.4);
-      },
-      rim: ctx => {
-        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type='square'; o.frequency.value=750*p; o.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.35, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.05);
-        o.start(now); o.stop(now+0.05);
-      }
     };
 
-    document.getElementById('beat-grid').addEventListener('pointerdown', e => {
-      const btn = e.target.closest('.beat-btn');
+    // ── Step Sequencer ───────────────────────────────────────
+    const SEQ_TRACKS = [
+      { id:'kick',  label:'KICK',   color:'rgba(239,68,68,0.82)'  },
+      { id:'snare', label:'SNARE',  color:'rgba(234,179,8,0.82)'  },
+      { id:'hihat', label:'HI-HAT', color:'rgba(34,197,94,0.82)'  },
+      { id:'clap',  label:'CLAP',   color:'rgba(249,115,22,0.82)' },
+      { id:'tom',   label:'TOM',    color:'rgba(139,92,246,0.82)' },
+    ];
+    const SEQ_STEPS = 16;
+    let seqPat = SEQ_TRACKS.map(() => Array(SEQ_STEPS).fill(false));
+    let seqRunning = false, seqCurStep = 0, seqBpm = 120, seqTimer = null;
+
+    function seqBuild() {
+      const grid = document.getElementById('seq-grid');
+      grid.innerHTML = '';
+      SEQ_TRACKS.forEach((trk, t) => {
+        const row = document.createElement('div');
+        row.className = 'seq-row';
+        const lbl = document.createElement('div');
+        lbl.className = 'seq-track-label'; lbl.textContent = trk.label;
+        row.appendChild(lbl);
+        for (let s = 0; s < SEQ_STEPS; s++) {
+          const btn = document.createElement('button');
+          btn.className = 'seq-step' + (s % 4 === 0 ? ' g4' : '');
+          btn.style.setProperty('--sc', trk.color);
+          btn.dataset.t = t; btn.dataset.s = s;
+          if (seqPat[t][s]) btn.classList.add('on');
+          row.appendChild(btn);
+        }
+        grid.appendChild(row);
+      });
+      seqUpdateHead(seqRunning ? seqCurStep : -1);
+    }
+
+    function seqUpdateHead(step) {
+      document.querySelectorAll('.seq-step').forEach(btn => {
+        btn.classList.toggle('head', +btn.dataset.s === step);
+      });
+    }
+
+    function seqTick() {
+      const ctx = getAudioCtx();
+      SEQ_TRACKS.forEach((trk, t) => {
+        if (seqPat[t][seqCurStep]) BEAT[trk.id](ctx);
+      });
+      seqUpdateHead(seqCurStep);
+      seqCurStep = (seqCurStep + 1) % SEQ_STEPS;
+      seqTimer = setTimeout(seqTick, (60 / seqBpm / 4) * 1000);
+    }
+
+    function seqStart() {
+      seqRunning = true; seqCurStep = 0;
+      const btn = document.getElementById('seq-play');
+      btn.textContent = '■ STOP'; btn.classList.add('playing');
+      seqTick();
+    }
+
+    function seqStop() {
+      seqRunning = false;
+      clearTimeout(seqTimer); seqTimer = null;
+      seqUpdateHead(-1);
+      const btn = document.getElementById('seq-play');
+      if (btn) { btn.textContent = '▶ PLAY'; btn.classList.remove('playing'); }
+    }
+
+    document.getElementById('seq-play').addEventListener('click', () => {
+      seqRunning ? seqStop() : seqStart();
+    });
+    document.getElementById('seq-bpm-up').addEventListener('click', () => {
+      seqBpm = Math.min(200, seqBpm + 5);
+      document.getElementById('seq-bpm-val').textContent = seqBpm;
+    });
+    document.getElementById('seq-bpm-dn').addEventListener('click', () => {
+      seqBpm = Math.max(60, seqBpm - 5);
+      document.getElementById('seq-bpm-val').textContent = seqBpm;
+    });
+    document.getElementById('seq-clear').addEventListener('click', () => {
+      seqPat = SEQ_TRACKS.map(() => Array(SEQ_STEPS).fill(false));
+      seqBuild();
+    });
+    document.getElementById('seq-grid').addEventListener('pointerdown', e => {
+      const btn = e.target.closest('.seq-step');
       if (!btn) return;
-      const fn = BEAT[btn.dataset.sound];
-      if (fn) fn(getAudioCtx());
-      btn.classList.add('flash');
-      setTimeout(() => btn.classList.remove('flash'), 110);
+      const t = +btn.dataset.t, s = +btn.dataset.s;
+      seqPat[t][s] = !seqPat[t][s];
+      btn.classList.toggle('on', seqPat[t][s]);
+      if (seqPat[t][s]) BEAT[SEQ_TRACKS[t].id](getAudioCtx());
     });
 
-    // ── PITCH draaiknop ──────────────────────────────────────
-    (function() {
-      const knob = document.getElementById('knob-pitch');
-      const dot  = knob.querySelector('.knob-dot');
-      let startY = 0, startVal = 0;
-      const setAngle = v => { dot.style.transform = `translateX(-50%) rotate(${-135 + v * 270}deg)`; };
-      setAngle(parseFloat(knob.dataset.val));
-      knob.addEventListener('pointerdown', e => {
-        e.preventDefault(); knob.setPointerCapture(e.pointerId);
-        startY = e.clientY; startVal = parseFloat(knob.dataset.val);
-      });
-      knob.addEventListener('pointermove', e => {
-        if (!knob.hasPointerCapture(e.pointerId)) return;
-        const v = Math.max(0, Math.min(1, startVal + (startY - e.clientY) / 140));
-        knob.dataset.val = v.toFixed(3); setAngle(v);
-      });
-    })();
+    // Stop sequencer when leaving OPEN state
+    new MutationObserver(() => {
+      if (!document.body.classList.contains('status-open') && seqRunning) seqStop();
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+    seqBuild();
 
     // ── Screen wake lock + webcam bewegingsdetectie ───────────
     let wakeLock = null;
