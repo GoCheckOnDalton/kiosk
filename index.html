@@ -1698,8 +1698,8 @@
   </div>
 
   <script>
-  /* Offline runner v2 — leerling (2× groter), pixel-art flora parallax,
-     gebouwen + 2 vijanden: Vos (score 600) en Kraai (score 1200)
+  /* Offline runner v3 — perf geoptimaliseerd (Chromebook),
+     pre-rendered flora + achtergrond, 2 parallax-lagen, lagere gebouwen
      Trigger: window offline | Alt+G testen | Escape sluiten */
   (function () {
     const OL = document.getElementById('dino-overlay');
@@ -1707,10 +1707,23 @@
     const CX = CV.getContext('2d');
 
     let W = 0, H = 0, GND = 0;
+    let bgCache = null;    // pre-rendered sky + sterren
+
+    function renderBg() {
+      bgCache = document.createElement('canvas');
+      bgCache.width = W; bgCache.height = H;
+      const bx = bgCache.getContext('2d');
+      const sky = bx.createLinearGradient(0,0,0,H);
+      sky.addColorStop(0,'#0d1830'); sky.addColorStop(0.65,'#1e3060'); sky.addColorStop(1,'#0a1020');
+      bx.fillStyle = sky; bx.fillRect(0,0,W,H);
+      bx.fillStyle = 'rgba(255,255,255,0.5)';
+      for (let i=0;i<45;i++) bx.fillRect((i*137+71)%W, (i*83+17)%(H*0.50), 1.5, 1.5);
+    }
     function resize() {
       W = CV.width  = OL.clientWidth;
       H = CV.height = OL.clientHeight;
       GND = H * 0.75;
+      renderBg();
     }
 
     // ── State ────────────────────────────────────────────────
@@ -1749,7 +1762,7 @@
       const type = pool[Math.floor(Math.random() * pool.length)];
       switch (type) {
         case 'bld': {
-          const h = 90 + Math.random() * 65;
+          const h = 70 + Math.random() * 40;
           obs.push({ x: W+20, y: GND-h, w: 55+Math.random()*35, h, type }); break;
         }
         case 'bill':
@@ -1765,19 +1778,16 @@
     }
 
     // ── Parallax flora ───────────────────────────────────────
-    let flora = { far:[], mid:[], near:[] };
-    let poff  = { far:0, mid:0, near:0 };
+    let flora = { mid:[], near:[] };
+    let poff  = { mid:0, near:0 };
     function initFlora() {
-      flora.far = [];
-      for (let x=0; x<3000; x += 140+Math.random()*80)
-        flora.far.push({ x, h: 70+Math.random()*50, t:'pine' });
       flora.mid = [];
-      for (let x=0; x<2400; x += 110+Math.random()*90)
+      for (let x=0; x<2400; x += 130+Math.random()*100)
         flora.mid.push({ x, h: 55+Math.random()*40, t: Math.random()<0.55?'pine':'oak' });
       flora.near = [];
-      for (let x=0; x<1600; x += 75+Math.random()*55)
+      for (let x=0; x<1600; x += 90+Math.random()*60)
         flora.near.push({ x, h: 18+Math.random()*14, t:'bush' });
-      poff = { far:0, mid:0, near:0 };
+      poff = { mid:0, near:0 };
     }
 
     // ── Helpers ───────────────────────────────────────────────
@@ -1789,8 +1799,7 @@
     }
 
     // ── Flora (pixel-art) ─────────────────────────────────────
-    function drawPine(x, baseY, h, a) {
-      CX.save(); CX.globalAlpha = a;
+    function drawPine(x, baseY, h) {
       const tw = Math.max(4, h*0.10), th = h*0.22, cw = h*0.55;
       CX.fillStyle = '#5C3A1E'; CX.fillRect(x-tw/2, baseY-th, tw, th);
       for (let i=0; i<5; i++) {
@@ -1798,10 +1807,8 @@
         CX.fillStyle = i%2===0 ? '#1E5C14' : '#267A1C';
         CX.fillRect(x-lw/2, ly, lw, h*0.78/5*1.3);
       }
-      CX.restore();
     }
-    function drawOak(x, baseY, h, a) {
-      CX.save(); CX.globalAlpha = a;
+    function drawOak(x, baseY, h) {
       const tw = Math.max(4, h*0.10), th = h*0.38, cr = h*0.38;
       CX.fillStyle = '#6B4226'; CX.fillRect(x-tw/2, baseY-th, tw, th);
       CX.fillStyle = '#267020';
@@ -1809,16 +1816,13 @@
       CX.fillRect(x-cr*0.7, baseY-th-cr*1.55, cr*1.4, cr*0.5);
       CX.fillStyle = '#338A28';
       CX.fillRect(x-cr*0.6, baseY-th-cr*1.2, cr*0.5, cr*0.4);
-      CX.restore();
     }
-    function drawBush(x, baseY, h, a) {
-      CX.save(); CX.globalAlpha = a;
+    function drawBush(x, baseY, h) {
       CX.fillStyle = '#1A6010';
       CX.fillRect(x-h, baseY-h*0.65, h*2, h*0.65);
       CX.fillRect(x-h*0.6, baseY-h, h*1.2, h*0.4);
       CX.fillStyle = '#228018';
       CX.fillRect(x-h*0.7, baseY-h*0.8, h*0.4, h*0.3);
-      CX.restore();
     }
 
     // ── Obstakels ─────────────────────────────────────────────
@@ -1934,7 +1938,6 @@
     // ── Loop ──────────────────────────────────────────────────
     function update() {
       const ps = gs === S.RUN ? spd : 1.5;
-      poff.far  += ps * 0.15;
       poff.mid  += ps * 0.42;
       poff.near += ps * 0.80;
       if (gs !== S.RUN) return;
@@ -1951,34 +1954,32 @@
 
     function draw() {
       CX.clearRect(0, 0, W, H);
-      const sky = CX.createLinearGradient(0,0,0,H);
-      sky.addColorStop(0,'#0d1830'); sky.addColorStop(0.65,'#1e3060'); sky.addColorStop(1,'#0a1020');
-      CX.fillStyle = sky; CX.fillRect(0,0,W,H);
-      CX.fillStyle = 'rgba(255,255,255,0.5)';
-      for (let i=0;i<45;i++) CX.fillRect((i*137+71)%W, (i*83+17)%(H*0.50), 1.5,1.5);
+      if (bgCache) CX.drawImage(bgCache, 0, 0);
 
-      // Far trees
-      const fR=3000; flora.far.forEach(it => {
-        const dx = ((it.x-poff.far)%fR+fR)%fR-200;
-        if (dx>-150&&dx<W+150) drawPine(dx, GND, it.h*0.6, 0.14);
-      });
-      // Mid trees
+      // Mid trees — one globalAlpha for the whole layer
+      CX.save(); CX.globalAlpha = 0.28;
       const mR=2400; flora.mid.forEach(it => {
         const dx = ((it.x-poff.mid)%mR+mR)%mR-150;
-        if (dx>-120&&dx<W+120) it.t==='pine' ? drawPine(dx,GND,it.h,0.28) : drawOak(dx,GND,it.h,0.28);
+        if (dx>-120&&dx<W+120) it.t==='pine' ? drawPine(dx,GND,it.h) : drawOak(dx,GND,it.h);
       });
+      CX.restore();
+
       // Ground
       CX.fillStyle='rgba(14,30,60,0.55)'; CX.fillRect(0,GND,W,H-GND);
-      // Near bushes
+
+      // Near bushes — one globalAlpha for the whole layer
+      CX.save(); CX.globalAlpha = 0.50;
       const nR=1600; flora.near.forEach(it => {
         const dx = ((it.x-poff.near)%nR+nR)%nR-80;
-        if (dx>-80&&dx<W+80) drawBush(dx, GND, it.h, 0.50);
+        if (dx>-80&&dx<W+80) drawBush(dx, GND, it.h);
       });
+      CX.restore();
+
       CX.strokeStyle='rgba(80,120,180,0.32)'; CX.lineWidth=2;
       CX.beginPath(); CX.moveTo(0,GND); CX.lineTo(W,GND); CX.stroke();
 
       obs.forEach(o => {
-        if (o.type==='bld')   drawBuilding(o.x, o.y, o.w, o.h);
+        if (o.type==='bld')        drawBuilding(o.x, o.y, o.w, o.h);
         else if (o.type==='bill')  drawBillboard(o.x, o.y, o.w, o.h);
         else if (o.type==='fox')   drawFox(o.x, o.y, o.h);
         else if (o.type==='crow')  drawCrow(o.x, o.y, o.w, o.h);
@@ -1992,7 +1993,6 @@
       CX.fillText('HI '+String(best).padStart(5,'0')+'  '+String(score).padStart(5,'0'), W-24, 22);
       CX.restore();
 
-      // Unlock-meldingen
       const af = `bold ${Math.max(16,W*0.028)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
       if (score>=580&&score<=660) {
         CX.save(); CX.globalAlpha=Math.max(0,1-Math.abs(score-620)/40);
