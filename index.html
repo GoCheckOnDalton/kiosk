@@ -333,42 +333,57 @@
     .seq-step.head { outline: 2.5px solid rgba(255,255,255,0.82); outline-offset: -2px; }
     .seq-step.on.head { filter: brightness(1.35); }
 
-    /* ── Piano (lead) — rechterkolom ── */
+    /* ── Piano — Roland 80s synth style ── */
     #piano-area {
-      width: 200px; flex-shrink: 0;
+      width: 500px; flex-shrink: 0;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: flex-end;
-      gap: 0.25rem; padding-bottom: 0.15rem;
+      align-items: stretch; justify-content: flex-end;
+      gap: 0.28rem; padding: 10px 12px 14px;
+      background: linear-gradient(155deg, #1e1b2e, #12101e);
+      border: 1.5px solid rgba(120,100,200,0.28);
+      border-radius: 12px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    #synth-brand {
+      font-family: 'Courier New', monospace;
+      font-size: 0.58rem; letter-spacing: 0.32em; text-transform: uppercase;
+      color: #ff4500; text-shadow: 0 0 10px rgba(255,70,0,0.85);
+      flex-shrink: 0;
     }
     #piano-label {
-      font-family: 'Barlow Condensed', var(--font);
-      font-size: clamp(0.72rem, 1.4vh, 1rem);
-      letter-spacing: 0.10em; color: rgba(255,255,255,0.55); text-align: center; flex-shrink: 0;
+      font-family: 'Courier New', monospace;
+      font-size: clamp(0.58rem, 1.2vh, 0.78rem);
+      letter-spacing: 0.16em; color: rgba(180,160,220,0.55); text-align: center; flex-shrink: 0;
     }
     #mini-piano {
       position: relative; display: flex;
       width: 100%; height: clamp(120px, 20vh, 170px);
       user-select: none; touch-action: none;
-      filter: drop-shadow(0 4px 20px rgba(0,0,0,0.40));
     }
     .piano-white {
       flex: 1;
-      background: linear-gradient(to bottom, #f0ece0, #e8e4d4);
-      border: 1.5px solid #666; border-top: 2.5px solid #555;
-      border-radius: 0 0 10px 10px; cursor: pointer;
-      position: relative; z-index: 1; transition: background 0.06s;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.18);
+      background: linear-gradient(to bottom, #ccc8dc 0%, #c0bcd0 40%, #cac6da 100%);
+      border: none; border-right: 1px solid rgba(30,20,50,0.45);
+      border-radius: 0 0 4px 4px; cursor: pointer;
+      position: relative; z-index: 1; transition: background 0.04s, box-shadow 0.04s;
+      box-shadow: inset 0 -6px 10px rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.25);
     }
-    .piano-white.active { background: linear-gradient(to bottom, #b8d8f8, #90c0f0); }
-    .piano-white:first-child { border-radius: 0 0 10px 10px; }
+    .piano-white:first-child { border-left: 1px solid rgba(30,20,50,0.45); }
+    .piano-white.active {
+      background: linear-gradient(to bottom, #00e8ff, #00a8c8);
+      box-shadow: 0 0 20px 6px rgba(0,232,255,0.80), inset 0 -4px 8px rgba(0,0,0,0.20);
+    }
     .piano-black {
       position: absolute; top: 0; height: 62%;
-      background: linear-gradient(to bottom, #1a1a22, #2c2c38);
-      border-radius: 0 0 7px 7px; z-index: 2; cursor: pointer;
-      transform: translateX(-50%); transition: background 0.06s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.55), inset 0 -2px 4px rgba(255,255,255,0.07);
+      background: linear-gradient(to bottom, #090814 0%, #161228 55%, #0d0b1e 100%);
+      border-radius: 0 0 4px 4px; z-index: 2; cursor: pointer;
+      transform: translateX(-50%); transition: background 0.04s, box-shadow 0.04s;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.90), inset 0 1px 0 rgba(120,100,200,0.10);
     }
-    .piano-black.active { background: linear-gradient(to bottom, #2a4a7a, #3a6aaa); }
+    .piano-black.active {
+      background: linear-gradient(to bottom, #1a50ff, #0828bb);
+      box-shadow: 0 0 18px 5px rgba(50,100,255,0.88), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
     /* ── Slider PIN overlay ── */
     #spo {
       position: fixed; inset: 0; z-index: 150;
@@ -907,7 +922,8 @@
       <div id="seq-grid"></div>
     </div>
     <div id="piano-area">
-      <div id="piano-label">Speel een lead melody op de beat.</div>
+      <div id="synth-brand">JX-800 · SYNTHESIZER</div>
+      <div id="piano-label">Speel een melody op de beat.</div>
       <div id="mini-piano" role="group" aria-label="Mini piano"></div>
     </div>
   </div>
@@ -1404,43 +1420,61 @@
       return audioCtx;
     }
 
-    function playPianoNote(freq) {
+    // 80s synth: 3 detuned saws + sub + filter sweep (Stranger Things vibes)
+    function noteOn(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
-      const f = freq * 1.5;
 
-      const master = ctx.createGain();
-      master.connect(ctx.destination);
+      const env = ctx.createGain();
+      env.connect(ctx.destination);
+      env.gain.setValueAtTime(0.001, now);
+      env.gain.linearRampToValueAtTime(0.55, now + 0.06);
 
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass'; filter.frequency.value = f * 6; filter.Q.value = 0.8;
-      filter.connect(master);
+      const filt = ctx.createBiquadFilter();
+      filt.type = 'lowpass'; filt.Q.value = 2.2;
+      filt.frequency.setValueAtTime(400, now);
+      filt.frequency.linearRampToValueAtTime(3800, now + 0.14);
+      filt.connect(env);
 
-      const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
-      o1.type = 'sine'; o1.frequency.value = f;
-      o1.connect(g1); g1.connect(filter);
-      g1.gain.setValueAtTime(0.0001, now);
-      g1.gain.linearRampToValueAtTime(0.50, now + 0.010);
-      g1.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
+      const oscs = [];
+      [-7, 0, 7].forEach((det, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = det;
+        o.connect(g); g.connect(filt);
+        g.gain.value = i === 1 ? 0.38 : 0.20;
+        o.start(now); oscs.push(o);
+      });
+      const sub = ctx.createOscillator(), subG = ctx.createGain();
+      sub.type = 'sine'; sub.frequency.value = freq / 2;
+      sub.connect(subG); subG.connect(env); subG.gain.value = 0.22;
+      sub.start(now); oscs.push(sub);
 
-      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
-      o2.type = 'sine'; o2.frequency.value = f / 2;
-      o2.connect(g2); g2.connect(filter);
-      g2.gain.setValueAtTime(0.0001, now);
-      g2.gain.linearRampToValueAtTime(0.20, now + 0.012);
-      g2.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-
-      o1.start(now); o1.stop(now + 2.4);
-      o2.start(now); o2.stop(now + 1.8);
+      return { oscs, env };
     }
 
+    function noteOff(note) {
+      if (!note) return;
+      const ctx = getAudioCtx(), now = ctx.currentTime, rel = 0.38;
+      note.env.gain.setValueAtTime(note.env.gain.value, now);
+      note.env.gain.exponentialRampToValueAtTime(0.001, now + rel);
+      note.oscs.forEach(o => { try { o.stop(now + rel + 0.05); } catch(e){} });
+    }
+
+    // C3–C5 (2 octaven, 15 witte + 10 zwarte toetsen)
     const PIANO_NOTES = [
-      { freq:261.63,black:false },{ freq:277.18,black:true,  pos:1  },
-      { freq:293.66,black:false },{ freq:311.13,black:true,  pos:2  },
+      { freq:130.81,black:false },{ freq:138.59,black:true, pos:1  },
+      { freq:146.83,black:false },{ freq:155.56,black:true, pos:2  },
+      { freq:164.81,black:false },
+      { freq:174.61,black:false },{ freq:185.00,black:true, pos:4  },
+      { freq:196.00,black:false },{ freq:207.65,black:true, pos:5  },
+      { freq:220.00,black:false },{ freq:233.08,black:true, pos:6  },
+      { freq:246.94,black:false },
+      { freq:261.63,black:false },{ freq:277.18,black:true, pos:8  },
+      { freq:293.66,black:false },{ freq:311.13,black:true, pos:9  },
       { freq:329.63,black:false },
-      { freq:349.23,black:false },{ freq:369.99,black:true,  pos:4  },
-      { freq:392.00,black:false },{ freq:415.30,black:true,  pos:5  },
-      { freq:440.00,black:false },{ freq:466.16,black:true,  pos:6  },
+      { freq:349.23,black:false },{ freq:369.99,black:true, pos:11 },
+      { freq:392.00,black:false },{ freq:415.30,black:true, pos:12 },
+      { freq:440.00,black:false },{ freq:466.16,black:true, pos:13 },
       { freq:493.88,black:false },
       { freq:523.25,black:false },
     ];
@@ -1448,9 +1482,8 @@
     function buildPiano() {
       const container = document.getElementById('mini-piano');
       const whites = PIANO_NOTES.filter(n => !n.black);
-      const nW = whites.length; // 15 witte toetsen
+      const nW = whites.length; // 15 witte toetsen (2 octaven)
 
-      // Witte toetsen
       whites.forEach(note => {
         const k = document.createElement('div');
         k.className = 'piano-white';
@@ -1458,27 +1491,29 @@
         addPianoListeners(k, note.freq);
       });
 
-      // Zwarte toetsen — pos = rechterkant witte toets index
-      const blackKeyWidth = (0.60 / nW * 100).toFixed(3) + '%';
+      const bkw = (0.60 / nW * 100).toFixed(3) + '%';
       PIANO_NOTES.filter(n => n.black).forEach(note => {
         const k = document.createElement('div');
         k.className = 'piano-black';
         k.style.left  = (note.pos / nW * 100).toFixed(3) + '%';
-        k.style.width  = blackKeyWidth;
+        k.style.width = bkw;
         container.appendChild(k);
         addPianoListeners(k, note.freq);
       });
     }
 
     function addPianoListeners(key, freq) {
+      let active = null;
       key.addEventListener('pointerdown', e => {
         e.preventDefault();
         key.classList.add('active');
-        playPianoNote(freq);
+        noteOff(active);
+        active = noteOn(freq);
       });
-      key.addEventListener('pointerup',    () => key.classList.remove('active'));
-      key.addEventListener('pointerleave', () => key.classList.remove('active'));
-      key.addEventListener('pointercancel',() => key.classList.remove('active'));
+      const rel = () => { key.classList.remove('active'); noteOff(active); active = null; };
+      key.addEventListener('pointerup',     rel);
+      key.addEventListener('pointerleave',  rel);
+      key.addEventListener('pointercancel', rel);
     }
 
     buildPiano();
