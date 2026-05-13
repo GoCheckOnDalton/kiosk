@@ -1432,7 +1432,7 @@
       const env = ctx.createGain();
       env.connect(ctx.destination);
       env.gain.setValueAtTime(0.001, now);
-      env.gain.linearRampToValueAtTime(0.18, now + 0.06);
+      env.gain.linearRampToValueAtTime(0.10, now + 0.06);
 
       const filt = ctx.createBiquadFilter();
       filt.type = 'lowpass'; filt.Q.value = 2.2;
@@ -1464,16 +1464,16 @@
       note.oscs.forEach(o => { try { o.stop(now + rel + 0.05); } catch(e){} });
     }
 
-    // C4–C5 (1 octaaf, 8 witte + 5 zwarte toetsen → 62px per witte toets op 500px)
+    // C3–C4 (1 octaaf lager, 8 witte + 5 zwarte toetsen → 62px per witte toets op 500px)
     const PIANO_NOTES = [
-      { freq:261.63,black:false },{ freq:277.18,black:true, pos:1 },
-      { freq:293.66,black:false },{ freq:311.13,black:true, pos:2 },
-      { freq:329.63,black:false },
-      { freq:349.23,black:false },{ freq:369.99,black:true, pos:4 },
-      { freq:392.00,black:false },{ freq:415.30,black:true, pos:5 },
-      { freq:440.00,black:false },{ freq:466.16,black:true, pos:6 },
-      { freq:493.88,black:false },
-      { freq:523.25,black:false },
+      { freq:130.81,black:false },{ freq:138.59,black:true, pos:1 },
+      { freq:146.83,black:false },{ freq:155.56,black:true, pos:2 },
+      { freq:164.81,black:false },
+      { freq:174.61,black:false },{ freq:185.00,black:true, pos:4 },
+      { freq:196.00,black:false },{ freq:207.65,black:true, pos:5 },
+      { freq:220.00,black:false },{ freq:233.08,black:true, pos:6 },
+      { freq:246.94,black:false },
+      { freq:261.63,black:false },
     ];
 
     function buildPiano() {
