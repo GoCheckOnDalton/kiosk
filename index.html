@@ -416,6 +416,7 @@
     body.status-open #open-screen  { display: flex; }
     body.status-open #layout       { display: none; }
     body.status-open #faq-btn      { display: none; }
+    body.status-open #game-btn     { display: inline-flex; }
 
     /* Gif als achtergrond in de slider track */
     .slider-gif {
@@ -692,6 +693,35 @@
     #faq-btn:hover   { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.50); }
     #faq-btn:active  { transform: scale(0.95); }
 
+    /* ── Knoppen-rij onder slider ── */
+    #action-btns {
+      display: flex; flex-direction: row;
+      align-items: center; justify-content: center;
+      gap: 0.7rem; flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    #faq-btn  { margin-bottom: 0; }
+    #game-btn {
+      display: inline-flex; flex-direction: row;
+      align-items: center; justify-content: center;
+      gap: 0.55rem;
+      padding: 0.55rem 1.4rem;
+      background: rgba(255,255,255,0.10);
+      border: 1.5px solid rgba(255,255,255,0.28);
+      border-radius: 50px;
+      color: rgba(255,255,255,0.82);
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.12s;
+    }
+    #game-btn .game-btn-icon  { font-size: 1.5rem; line-height: 1; }
+    #game-btn .game-btn-label {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
+      text-align: center; line-height: 1;
+    }
+    #game-btn:hover  { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.50); }
+    #game-btn:active { transform: scale(0.95); }
+
     /* ── FAQ Modal — full screen, accessible ── */
     #faq-overlay {
       position: fixed; inset: 0;
@@ -873,10 +903,16 @@
         </div>
       </div>
     </div>
-    <button id="faq-btn" onclick="openFaq()">
-      <span class="faq-btn-icon">❓</span>
-      <span class="faq-btn-label">VEELGESTELDE VRAGEN</span>
-    </button>
+    <div id="action-btns">
+      <button id="faq-btn" onclick="openFaq()">
+        <span class="faq-btn-icon">❓</span>
+        <span class="faq-btn-label">VEELGESTELDE VRAGEN</span>
+      </button>
+      <button id="game-btn" onclick="toggleDinoGame()">
+        <span class="game-btn-icon">🎮</span>
+        <span class="game-btn-label">MINI-GAME</span>
+      </button>
+    </div>
   </div>
 
   <!-- OPEN welcome — below slider, replaces panel grid -->
@@ -1644,6 +1680,304 @@
     }
     startMotionDetection();
 
+  </script>
+
+  <!-- ── Offline mini-game ── -->
+  <style>
+    #dino-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; overflow: hidden;
+      background: #0d1422;
+    }
+    #dino-overlay.active { display: block; }
+    #dino-canvas { display: block; width: 100%; height: 100%; }
+  </style>
+
+  <div id="dino-overlay" aria-label="Offline mini-game">
+    <canvas id="dino-canvas"></canvas>
+  </div>
+
+  <script>
+  /* Offline runner — leerling met brugklas rugzak
+     Springen over: staande DALTON logo-blokken
+     Bukken voor:  vliegende DALTON logo-balken
+     Achtergrond:  parallax DALTON DEN HAAG logo's
+     Trigger:      window offline   |  Alt+G om te testen  |  Escape om te sluiten */
+  (function () {
+    const OL = document.getElementById('dino-overlay');
+    const CV = document.getElementById('dino-canvas');
+    const CX = CV.getContext('2d');
+
+    let W = 0, H = 0, GND = 0;
+    function resize() {
+      W = CV.width  = OL.clientWidth;
+      H = CV.height = OL.clientHeight;
+      GND = H * 0.75;
+    }
+
+    // ── State ────────────────────────────────────────────────
+    const S = { IDLE: 0, RUN: 1, DEAD: 2 };
+    let gs = S.IDLE;
+    let score = 0, best = +localStorage.getItem('dino-best') || 0;
+    let spd = 5, tick = 0, raf = null;
+
+    // ── Player ───────────────────────────────────────────────
+    const P = { x: 100, y: 0, vy: 0, duck: false, grounded: true,
+                W: 42, H: 62, dW: 52, dH: 32 };
+    const pw = () => P.duck ? P.dW : P.W;
+    const ph = () => P.duck ? P.dH : P.H;
+
+    function pReset() { P.y = GND - ph(); P.vy = 0; P.duck = false; P.grounded = true; }
+    function pJump()  { if (!P.grounded) return; P.vy = -16; P.grounded = false; }
+    function pUpdate() {
+      if (!P.grounded) {
+        P.vy += 0.75; P.y += P.vy;
+        if (P.y >= GND - ph()) { P.y = GND - ph(); P.vy = 0; P.grounded = true; }
+      } else {
+        P.y = GND - ph();
+      }
+    }
+
+    // ── Obstacles ────────────────────────────────────────────
+    let obs = [], nextObs = 100;
+    function spawnObs() {
+      if (Math.random() < 0.55) {
+        const h = 58 + Math.random() * 18;
+        obs.push({ x: W + 20, y: GND - h, w: 42, h });       // staand — spring
+      } else {
+        obs.push({ x: W + 20, y: GND - 74, w: 70, h: 36 });  // vliegend — buk
+      }
+      nextObs = 80 + Math.random() * 170;
+    }
+
+    // ── Parallax ─────────────────────────────────────────────
+    const PX = [
+      { ox: 0,   sp: 0.22, al: 0.030, sc: 4.0, ry: 0.06 },
+      { ox: 500, sp: 0.55, al: 0.055, sc: 2.2, ry: 0.50 },
+      { ox: 150, sp: 1.0,  al: 0.085, sc: 1.3, ry: 0.22 },
+    ];
+
+    // ── roundRect helper ─────────────────────────────────────
+    function rr(x, y, w, h, r) {
+      if (CX.roundRect) { CX.beginPath(); CX.roundRect(x, y, w, h, r); return; }
+      CX.beginPath();
+      CX.moveTo(x + r, y);
+      CX.arcTo(x + w, y,     x + w, y + r,     r);
+      CX.arcTo(x + w, y + h, x + w - r, y + h, r);
+      CX.arcTo(x, y + h,     x, y + h - r,     r);
+      CX.arcTo(x, y,         x + r, y,         r);
+      CX.closePath();
+    }
+
+    // ── DALTON DEN HAAG logo blok ─────────────────────────────
+    function drawLogo(x, y, w, h, a) {
+      CX.save(); CX.globalAlpha = a;
+      const rad = Math.min(8, Math.min(w, h) * 0.12);
+      rr(x, y, w, h, rad); CX.clip();
+      CX.fillStyle = '#fff'; CX.fillRect(x, y, w, h);
+      const portrait = h > w;
+      if (portrait) {
+        // Staand logo-blok (springen)
+        CX.fillStyle = '#1a3a6b'; CX.fillRect(x, y, w, h * 0.42);
+        CX.fillStyle = '#fff';
+        CX.font = `bold ${Math.max(8, w * 0.68)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.textAlign = 'center'; CX.textBaseline = 'middle';
+        CX.fillText('D', x + w / 2, y + h * 0.21);
+        CX.fillStyle = '#1a3a6b';
+        CX.font = `bold ${Math.max(6, w * 0.44)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.fillText('ALTON', x + w / 2, y + h * 0.57);
+        CX.font = `${Math.max(5, w * 0.24)}px 'Barlow Condensed',sans-serif`;
+        CX.fillStyle = '#4a6a9b';
+        CX.fillText('DEN HAAG', x + w / 2, y + h * 0.78);
+      } else {
+        // Liggend logo-balk (bukken)
+        CX.fillStyle = '#1a3a6b'; CX.fillRect(x, y, w * 0.32, h);
+        CX.fillStyle = '#fff';
+        CX.font = `bold ${Math.max(8, h * 0.60)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.textAlign = 'center'; CX.textBaseline = 'middle';
+        CX.fillText('D', x + w * 0.16, y + h * 0.5);
+        CX.fillStyle = '#1a3a6b';
+        CX.font = `bold ${Math.max(7, h * 0.35)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.textAlign = 'left';
+        CX.fillText('ALTON', x + w * 0.36, y + h * 0.35);
+        CX.font = `${Math.max(5, h * 0.20)}px 'Barlow Condensed',sans-serif`;
+        CX.fillStyle = '#4a6a9b';
+        CX.fillText('DEN HAAG', x + w * 0.36, y + h * 0.72);
+      }
+      CX.restore();
+    }
+
+    // ── Leerling karakter ─────────────────────────────────────
+    function drawStudent(x, y) {
+      const dk = P.duck, t = tick;
+      const SKIN='#f4a261', HAIR='#2a1a0a', SHIRT='#457b9d',
+            PANTS='#1d3557', SHOE='#e8e0d0', BP1='#e63946', BP2='#c1121f';
+      CX.save();
+      if (!dk) {
+        const sw = Math.sin(t * 0.30) * 9;
+        // Rugzak (links, achter lichaam — heel groot!)
+        CX.fillStyle = BP1; rr(x + 1, y + 13, 20, 36, 4); CX.fill();
+        CX.fillStyle = BP2; rr(x + 4, y + 22, 12, 13, 2); CX.fill();
+        // Schouderriem zichtbaar
+        CX.strokeStyle = BP2; CX.lineWidth = 2.5;
+        CX.beginPath(); CX.moveTo(x + 13, y + 15); CX.lineTo(x + 20, y + 20); CX.stroke();
+        // Lichaam (shirt)
+        CX.fillStyle = SHIRT; rr(x + 19, y + 18, 18, 24, 3); CX.fill();
+        // Hoofd
+        CX.fillStyle = SKIN; CX.beginPath(); CX.arc(x + 28, y + 11, 11, 0, Math.PI * 2); CX.fill();
+        // Haar
+        CX.fillStyle = HAIR; CX.beginPath(); CX.ellipse(x + 28, y + 3, 11, 7, 0, Math.PI, Math.PI * 2); CX.fill();
+        // Ogen
+        CX.fillStyle = '#333'; CX.fillRect(x + 23, y + 9, 3, 3); CX.fillRect(x + 30, y + 9, 3, 3);
+        // Benen (lopende animatie)
+        CX.fillStyle = PANTS;
+        rr(x + 20, y + 40, 7, 16 + sw, 2); CX.fill();
+        rr(x + 29, y + 40, 7, 16 - sw, 2); CX.fill();
+        // Schoenen
+        CX.fillStyle = SHOE;
+        CX.fillRect(x + 18, y + 54 + sw, 11, 5);
+        CX.fillRect(x + 27, y + 54 - sw, 11, 5);
+      } else {
+        // Gebukt — rugzak nog prominenter
+        CX.fillStyle = BP1; rr(x + 1, y + 3, 24, 24, 4); CX.fill();
+        CX.fillStyle = BP2; rr(x + 5, y + 10, 15, 10, 2); CX.fill();
+        // Lichaam platgedrukt
+        CX.fillStyle = SHIRT; rr(x + 21, y + 7, 22, 15, 3); CX.fill();
+        // Hoofd voorovergebogen
+        CX.fillStyle = SKIN; CX.beginPath(); CX.arc(x + 39, y + 7, 9, 0, Math.PI * 2); CX.fill();
+        CX.fillStyle = HAIR; CX.beginPath(); CX.ellipse(x + 39, y + 1, 9, 5, -0.2, Math.PI, Math.PI * 2); CX.fill();
+        CX.fillStyle = '#333'; CX.fillRect(x + 34, y + 5, 2.5, 2.5); CX.fillRect(x + 40, y + 5, 2.5, 2.5);
+        // Geknepen benen
+        CX.fillStyle = PANTS;
+        rr(x + 23, y + 20, 8, 10, 2); CX.fill();
+        rr(x + 33, y + 20, 8, 10, 2); CX.fill();
+        CX.fillStyle = SHOE;
+        CX.fillRect(x + 21, y + 28, 12, 4); CX.fillRect(x + 31, y + 28, 12, 4);
+      }
+      CX.restore();
+    }
+
+    // ── Collision ─────────────────────────────────────────────
+    function hits(o) {
+      const m = 6;
+      return (P.x + m)        < (o.x + o.w - m) &&
+             (P.x + pw() - m) > (o.x + m)        &&
+             (P.y + m)        < (o.y + o.h - m)  &&
+             (P.y + ph() - m) > (o.y + m);
+    }
+
+    // ── Loop ──────────────────────────────────────────────────
+    function update() {
+      if (gs !== S.RUN) return;
+      tick++; score++; spd = 5 + score * 0.0013;
+      pUpdate();
+      nextObs--; if (nextObs <= 0) spawnObs();
+      obs.forEach(o => o.x -= spd);
+      obs = obs.filter(o => o.x + o.w > -10);
+      if (obs.some(hits)) {
+        gs = S.DEAD;
+        if (score > best) { best = score; localStorage.setItem('dino-best', best); }
+      }
+      PX.forEach(l => { l.ox -= spd * l.sp; });
+    }
+
+    function draw() {
+      CX.clearRect(0, 0, W, H);
+      // Achtergrond
+      const bg = CX.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#0d1422'); bg.addColorStop(1, '#1b2a4a');
+      CX.fillStyle = bg; CX.fillRect(0, 0, W, H);
+
+      // Parallax DALTON logo's
+      PX.forEach(l => {
+        const lw = 200 * l.sc, lh = 80 * l.sc, gap = lw * 0.85;
+        const sx = (l.ox % (lw + gap)) - lw - gap;
+        for (let x = sx; x < W; x += lw + gap) drawLogo(x, H * l.ry, lw, lh, l.al);
+      });
+
+      // Grondlijn
+      CX.fillStyle = 'rgba(255,255,255,0.04)'; CX.fillRect(0, GND, W, H - GND);
+      CX.strokeStyle = 'rgba(255,255,255,0.28)'; CX.lineWidth = 2;
+      CX.beginPath(); CX.moveTo(0, GND); CX.lineTo(W, GND); CX.stroke();
+
+      // Obstakels
+      obs.forEach(o => drawLogo(o.x, o.y, o.w, o.h, 1));
+
+      // Speler
+      drawStudent(P.x, P.y);
+
+      // Score
+      CX.save();
+      CX.fillStyle = 'rgba(255,255,255,0.80)';
+      CX.font = `bold ${Math.max(14, W * 0.022)}px 'Barlow Condensed',sans-serif`;
+      CX.textAlign = 'right'; CX.textBaseline = 'top';
+      CX.fillText('HI ' + String(best).padStart(5,'0') + '  ' + String(score).padStart(5,'0'), W - 24, 22);
+      CX.restore();
+
+      // Idle / Game-over bericht
+      if (gs !== S.RUN) {
+        CX.save(); CX.textAlign = 'center';
+        CX.fillStyle = 'rgba(255,255,255,0.92)';
+        CX.font = `bold ${Math.max(26, W * 0.042)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.textBaseline = 'middle';
+        CX.fillText(gs === S.DEAD ? 'GAME OVER' : 'GEEN INTERNET', W / 2, H * 0.43);
+        CX.fillStyle = 'rgba(255,255,255,0.55)';
+        CX.font = `${Math.max(14, W * 0.021)}px 'Barlow Condensed',sans-serif`;
+        CX.fillText('Tik of druk SPATIE om te spelen', W / 2, H * 0.52);
+        CX.restore();
+      }
+    }
+
+    function loop() { update(); draw(); raf = requestAnimationFrame(loop); }
+
+    function startGame() {
+      score = 0; spd = 5; tick = 0; obs = []; nextObs = 100;
+      pReset(); gs = S.RUN;
+    }
+
+    function show() {
+      OL.classList.add('active');
+      resize(); pReset(); gs = S.IDLE;
+      if (!raf) raf = requestAnimationFrame(loop);
+    }
+    function hide() {
+      OL.classList.remove('active');
+      if (raf) { cancelAnimationFrame(raf); raf = null; }
+      gs = S.IDLE;
+    }
+
+    // ── Input ─────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (!OL.classList.contains('active')) return;
+      if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        if (gs !== S.RUN) startGame(); else pJump();
+      }
+      if (e.code === 'ArrowDown') { e.preventDefault(); P.duck = true; }
+      if (e.code === 'Escape') hide();
+    });
+    document.addEventListener('keyup', e => { if (e.code === 'ArrowDown') P.duck = false; });
+    OL.addEventListener('pointerdown', e => {
+      if (gs !== S.RUN) { startGame(); return; }
+      e.clientY > OL.clientHeight * 0.58 ? (P.duck = true) : pJump();
+    });
+    OL.addEventListener('pointerup', () => { P.duck = false; });
+    window.addEventListener('resize', () => {
+      if (OL.classList.contains('active')) { resize(); if (gs !== S.RUN) pReset(); }
+    });
+
+    // Knop-toegang
+    window.toggleDinoGame = () => OL.classList.contains('active') ? hide() : show();
+
+    // Trigger
+    window.addEventListener('offline', show);
+    window.addEventListener('online',  hide);
+    // Alt+G = test
+    document.addEventListener('keydown', e => {
+      if (e.altKey && e.code === 'KeyG') OL.classList.contains('active') ? hide() : show();
+    });
+    if (!navigator.onLine) show();
+  })();
   </script>
 </body>
 </html>
