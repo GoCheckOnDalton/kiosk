@@ -265,32 +265,135 @@
     #open-screen {
       display: none;
       flex: 1; min-height: 0;
-      flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 0.8rem; text-align: center;
+      flex-direction: row;
+      align-items: flex-end; justify-content: center;
+      gap: 1.8rem;
       position: relative; z-index: 1;
-      padding: 0.4rem 1rem 0.6rem;
+      padding: 0.4rem 2rem 0.8rem;
     }
+    #piano-area {
+      display: flex; flex-direction: column;
+      align-items: flex-start; gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    #beat-area {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.55rem;
+      flex-shrink: 0;
+    }
+    #beat-label {
+      font-family: var(--font); font-size: clamp(0.7rem, 1.3vh, 0.9rem);
+      letter-spacing: 0.22em; color: rgba(255,255,255,0.45);
+    }
+    #beat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 0.45rem; width: min(40vw, 500px);
+    }
+    .beat-btn {
+      height: clamp(46px, 8vh, 78px);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.16);
+      color: rgba(255,255,255,0.72);
+      font-family: var(--font); font-size: clamp(0.55rem, 1.1vw, 0.82rem);
+      letter-spacing: 0.10em; cursor: pointer;
+      transition: background 0.08s, transform 0.06s, box-shadow 0.08s;
+      touch-action: none;
+    }
+    .beat-btn.flash {
+      transform: scale(0.90);
+      box-shadow: 0 0 20px 6px var(--bc, rgba(255,255,255,0.35));
+      background: rgba(255,255,255,0.22);
+    }
+    #knobs-row { display: flex; gap: 2rem; align-items: center; padding-top: 0.2rem; }
+    .knob-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; }
+    .knob {
+      width: clamp(46px, 7vh, 62px); height: clamp(46px, 7vh, 62px);
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, #3a3a52, #181824);
+      border: 2px solid rgba(255,255,255,0.28);
+      position: relative; cursor: ns-resize;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.45), inset 0 1px 2px rgba(255,255,255,0.07);
+      touch-action: none; user-select: none;
+    }
+    .knob:hover { border-color: rgba(255,255,255,0.50); }
+    .knob-dot {
+      position: absolute; top: 10%; left: 50%;
+      width: 3px; height: 32%;
+      background: rgba(255,255,255,0.88);
+      border-radius: 2px;
+      transform-origin: bottom center;
+      transform: translateX(-50%) rotate(-135deg);
+      pointer-events: none;
+    }
+    .knob-label {
+      font-family: var(--font); font-size: clamp(0.55rem, 1vh, 0.72rem);
+      letter-spacing: 0.18em; color: rgba(255,255,255,0.48);
+    }
+    /* ── Slider PIN overlay ── */
+    #spo {
+      position: fixed; inset: 0; z-index: 150;
+      background: rgba(4,4,14,0.97);
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    #spo[hidden] { display: none; }
+    #spo-inner { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+    #spo-subtitle {
+      font-family: 'Barlow Condensed', var(--font);
+      font-size: clamp(1rem, 2.2vw, 1.5rem);
+      letter-spacing: 0.24em; color: rgba(255,255,255,0.38);
+    }
+    #spo-display {
+      font-family: 'Barlow Condensed', var(--font);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      letter-spacing: 0.12em; color: #fff;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 14px; padding: 0.65rem 2.5rem;
+      min-width: 300px; text-align: center;
+    }
+    #spo-display.error { color: #f87171; animation: spo-shake 0.45s ease; }
+    #spo-display.ok    { color: #4ade80; }
+    @keyframes spo-shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-14px); }
+      40% { transform: translateX(14px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(10px); }
+    }
+    #spo-keypad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem; width: min(400px, 88vw);
+    }
+    .spo-key {
+      height: clamp(68px, 12vh, 96px);
+      border-radius: 16px;
+      font-size: clamp(1.8rem, 4.5vw, 3rem);
+      font-family: 'Barlow Condensed', var(--font); font-weight: 600;
+      background: rgba(255,255,255,0.09);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      color: #fff; cursor: pointer;
+      transition: background 0.12s, transform 0.08s;
+    }
+    .spo-key:hover  { background: rgba(255,255,255,0.18); }
+    .spo-key:active { transform: scale(0.90); background: rgba(255,255,255,0.28); }
+    .spo-cancel { color: rgba(248,113,113,0.88); border-color: rgba(248,113,113,0.28); font-size: clamp(1.2rem,3vw,2rem); }
+    .spo-del    { font-size: clamp(1.2rem,3vw,2rem); }
     body.status-open #open-screen  { display: flex; }
     body.status-open #layout       { display: none; }
     body.status-open #faq-btn      { display: none; }
 
     /* Gif als achtergrond in de slider track */
-    #slider-bg-gif {
-      position: absolute;
-      right: 0; top: 0; bottom: 0;
+    .slider-gif {
+      position: absolute; top: 0; bottom: 0;
       height: 100%; width: auto;
-      opacity: 0.22;
-      pointer-events: none;
-      z-index: 0;
-      transition: left 0.6s ease, right 0.6s ease;
-      object-fit: cover;
+      opacity: 0.22; pointer-events: none; z-index: 0; object-fit: cover;
     }
-    body.status-open #slider-bg-gif {
-      right: auto;
-      left: 0;
-      transform: scaleX(-1);
-    }
+    #slider-gif-closed { right: 0; left: auto; }
+    #slider-gif-open   { left: 0; right: auto; transform: scaleX(-1); display: none; }
+    body.status-open  #slider-gif-closed { display: none; }
+    body.status-open  #slider-gif-open   { display: block; }
 
     /* ── Mini Piano ── */
     #piano-label {
@@ -303,8 +406,8 @@
     #mini-piano {
       position: relative;
       display: flex;
-      width: min(94vw, 620px);
-      height: clamp(120px, 19vh, 185px);
+      width: min(50vw, 680px);
+      height: clamp(160px, 26vh, 240px);
       user-select: none; touch-action: none;
       filter: drop-shadow(0 6px 28px rgba(0,0,0,0.40));
     }
@@ -724,7 +827,10 @@
   <div id="slider-row">
     <div id="status-slider" aria-label="Status wisselen">
       <div id="sl-track">
-        <img id="slider-bg-gif"
+        <img id="slider-gif-closed" class="slider-gif"
+             src="https://media1.giphy.com/media/mBnJ5l4HZgQq0w1D2G/giphy.gif"
+             alt="" draggable="false">
+        <img id="slider-gif-open" class="slider-gif"
              src="https://media3.giphy.com/media/ASd0Ukj0y3qMM/giphy.gif"
              alt="" draggable="false">
         <div id="sl-knob"
@@ -742,8 +848,33 @@
 
   <!-- OPEN welcome — below slider, replaces panel grid -->
   <div id="open-screen">
-    <div id="piano-label">Speel wat voor aandacht.</div>
-    <div id="mini-piano" role="group" aria-label="Mini piano — speel een nootje!"></div>
+    <div id="piano-area">
+      <div id="piano-label">Speel wat voor aandacht.</div>
+      <div id="mini-piano" role="group" aria-label="Mini piano"></div>
+    </div>
+    <div id="beat-area">
+      <div id="beat-label">BEATPAD</div>
+      <div id="beat-grid">
+        <button class="beat-btn" data-sound="kick"   style="--bc:rgba(239,68,68,0.6)">KICK</button>
+        <button class="beat-btn" data-sound="snare"  style="--bc:rgba(234,179,8,0.6)">SNARE</button>
+        <button class="beat-btn" data-sound="hihat"  style="--bc:rgba(34,197,94,0.6)">HI-HAT</button>
+        <button class="beat-btn" data-sound="clap"   style="--bc:rgba(249,115,22,0.6)">CLAP</button>
+        <button class="beat-btn" data-sound="tom"    style="--bc:rgba(139,92,246,0.6)">TOM</button>
+        <button class="beat-btn" data-sound="openhi" style="--bc:rgba(6,182,212,0.6)">OPEN HH</button>
+        <button class="beat-btn" data-sound="crash"  style="--bc:rgba(236,72,153,0.6)">CRASH</button>
+        <button class="beat-btn" data-sound="rim"    style="--bc:rgba(168,162,158,0.6)">RIM</button>
+      </div>
+      <div id="knobs-row">
+        <div class="knob-wrap">
+          <div class="knob" id="knob-pitch" data-val="0.5"><div class="knob-dot"></div></div>
+          <span class="knob-label">PITCH</span>
+        </div>
+        <div class="knob-wrap">
+          <div class="knob" id="knob-mod" data-val="0"><div class="knob-dot"></div></div>
+          <span class="knob-label">MOD</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- 2-column grid (GESLOTEN only) -->
@@ -810,6 +941,28 @@
 
   <div id="toast" role="alert" aria-live="assertive"></div>
 
+  <!-- Slider PIN overlay -->
+  <div id="spo" hidden>
+    <div id="spo-inner">
+      <div id="spo-subtitle">🖐 Alleen voor medewerkers</div>
+      <div id="spo-display">Don't Touch Me!</div>
+      <div id="spo-keypad">
+        <button class="spo-key" data-k="1">1</button>
+        <button class="spo-key" data-k="2">2</button>
+        <button class="spo-key" data-k="3">3</button>
+        <button class="spo-key" data-k="4">4</button>
+        <button class="spo-key" data-k="5">5</button>
+        <button class="spo-key" data-k="6">6</button>
+        <button class="spo-key" data-k="7">7</button>
+        <button class="spo-key" data-k="8">8</button>
+        <button class="spo-key" data-k="9">9</button>
+        <button class="spo-key spo-cancel" data-k="cancel">✕</button>
+        <button class="spo-key" data-k="0">0</button>
+        <button class="spo-key spo-del" data-k="del">⌫</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FAQ Modal -->
   <div id="faq-overlay" role="dialog" aria-modal="true" aria-label="Veelgestelde vragen">
     <div id="faq-panel">
@@ -852,30 +1005,15 @@
       if (k) handlePinKey(k.dataset.k);
     });
 
-    // ── Slider ───────────────────────────────────────────────
+    // ── Slider — PIN beschermd ────────────────────────────────
     const slKnob = document.getElementById('sl-knob');
-    const slTrack = document.getElementById('sl-track');
-    let dragging = false, dragStartX = 0, knobStartL = 0;
-
     slKnob.addEventListener('pointerdown', e => {
-      dragging = true; dragStartX = e.clientX; knobStartL = slKnob.offsetLeft;
-      slKnob.classList.add('dragging'); slKnob.setPointerCapture(e.pointerId); e.preventDefault();
-    });
-    slKnob.addEventListener('pointermove', e => {
-      if (!dragging) return;
-      const max = slTrack.offsetWidth - slKnob.offsetWidth - 8;
-      slKnob.style.left = Math.max(8, Math.min(max, knobStartL + e.clientX - dragStartX)) + 'px';
-    });
-    slKnob.addEventListener('pointerup', e => {
-      if (!dragging) return;
-      dragging = false; slKnob.classList.remove('dragging'); slKnob.style.left = '';
-      const delta = e.clientX - dragStartX, thr = slTrack.offsetWidth * 0.25;
-      if      (currentStatus === 'closed' && delta >  thr) { applyStatus('open');   toast('✅ BALIE STAAT NU OP OPEN'); }
-      else if (currentStatus === 'open'   && delta < -thr) { applyStatus('closed'); toast('🔴 BALIE STAAT NU OP GESLOTEN'); }
+      e.preventDefault();
+      openSliderPin(currentStatus === 'closed' ? 'open' : 'closed');
     });
     slKnob.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' && currentStatus === 'closed') applyStatus('open');
-      if (e.key === 'ArrowLeft'  && currentStatus === 'open')   applyStatus('closed');
+      if (e.key === 'ArrowRight' && currentStatus === 'closed') openSliderPin('open');
+      if (e.key === 'ArrowLeft'  && currentStatus === 'open')   openSliderPin('closed');
     });
 
     // ── Status ───────────────────────────────────────────────
@@ -1177,6 +1315,53 @@
       toastTimer=setTimeout(()=>el.classList.remove('show'),3500);
     }
 
+    // ── Slider PIN ───────────────────────────────────────────
+    const SLIDER_PIN = '563';
+    let spoBuffer = '', spoTarget = null;
+
+    function openSliderPin(nextState) {
+      spoTarget = nextState;
+      spoBuffer = '';
+      const d = document.getElementById('spo-display');
+      d.textContent = "Don't Touch Me!";
+      d.className = '';
+      document.getElementById('spo').hidden = false;
+    }
+    function closeSliderPin() { document.getElementById('spo').hidden = true; }
+
+    document.getElementById('spo').addEventListener('pointerdown', e => {
+      const btn = e.target.closest('.spo-key');
+      if (!btn) return;
+      const k = btn.dataset.k;
+      const d = document.getElementById('spo-display');
+      if (k === 'cancel') { closeSliderPin(); return; }
+      if (k === 'del') {
+        spoBuffer = spoBuffer.slice(0, -1);
+        d.textContent = spoBuffer.length ? '●'.repeat(spoBuffer.length) : "Don't Touch Me!";
+        return;
+      }
+      if (spoBuffer.length === 0) d.textContent = '';
+      spoBuffer += k;
+      d.textContent = '●'.repeat(spoBuffer.length);
+      if (spoBuffer.length === 3) {
+        if (spoBuffer === SLIDER_PIN) {
+          d.textContent = '✓'; d.className = 'ok';
+          setTimeout(() => {
+            closeSliderPin();
+            applyStatus(spoTarget);
+            toast(spoTarget === 'open' ? '✅ BALIE STAAT NU OP OPEN' : '🔴 BALIE STAAT NU OP GESLOTEN');
+          }, 400);
+        } else {
+          d.className = 'error';
+          setTimeout(() => {
+            spoBuffer = '';
+            d.textContent = "Don't Touch Me!";
+            d.className = '';
+          }, 900);
+        }
+      }
+    });
+
     // ── Mini Piano ───────────────────────────────────────────
     let audioCtx = null;
     function getAudioCtx() {
@@ -1184,30 +1369,43 @@
       return audioCtx;
     }
 
+    function getKnobVal(id) {
+      const k = document.getElementById(id);
+      return k ? parseFloat(k.dataset.val) : 0.5;
+    }
+
     function playPianoNote(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
-      const f = freq * 1.5; // anderhalf octaaf hoger: helder maar niet schel
+      const pitch = 0.5 + getKnobVal('knob-pitch') * 1.5; // 0.5x – 2.0x
+      const mod   = getKnobVal('knob-mod');                // 0 – 1
+      const f = freq * 1.5 * pitch;
 
-      // Low-pass filter om hoge harmonischen af te knippen
+      const master = ctx.createGain();
+      master.connect(ctx.destination);
+
+      // Tremolo LFO via MOD knob
+      if (mod > 0.02) {
+        const lfo = ctx.createOscillator();
+        const lfoG = ctx.createGain();
+        lfo.type = 'sine'; lfo.frequency.value = 1 + mod * 11;
+        lfoG.gain.value = mod * 0.45;
+        lfo.connect(lfoG); lfoG.connect(master.gain);
+        lfo.start(now); lfo.stop(now + 2.4);
+      }
+
       const filter = ctx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = f * 6;
-      filter.Q.value = 0.8;
-      filter.connect(ctx.destination);
+      filter.type = 'lowpass'; filter.frequency.value = f * 6; filter.Q.value = 0.8;
+      filter.connect(master);
 
-      // Grondtoon — sine: zacht, geen harde harmonischen
-      const o1 = ctx.createOscillator();
-      const g1 = ctx.createGain();
+      const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
       o1.type = 'sine'; o1.frequency.value = f;
       o1.connect(g1); g1.connect(filter);
       g1.gain.setValueAtTime(0.0001, now);
       g1.gain.linearRampToValueAtTime(0.50, now + 0.010);
       g1.gain.exponentialRampToValueAtTime(0.0001, now + 2.4);
 
-      // Sub-octaaf voor warmte/bas
-      const o2 = ctx.createOscillator();
-      const g2 = ctx.createGain();
+      const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
       o2.type = 'sine'; o2.frequency.value = f / 2;
       o2.connect(g2); g2.connect(filter);
       g2.gain.setValueAtTime(0.0001, now);
@@ -1266,6 +1464,112 @@
     }
 
     buildPiano();
+
+    // ── Beat Pad ─────────────────────────────────────────────
+    function makeNoiseBuf(ctx, dur) {
+      const n = Math.floor(ctx.sampleRate * dur);
+      const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      return buf;
+    }
+
+    const BEAT = {
+      kick: ctx => {
+        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination); o.type = 'sine';
+        o.frequency.setValueAtTime(160*p, now); o.frequency.exponentialRampToValueAtTime(35*p, now+0.45);
+        g.gain.setValueAtTime(1.2, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
+        o.start(now); o.stop(now+0.5);
+      },
+      snare: ctx => {
+        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.25);
+        const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=2200; nf.Q.value=0.9;
+        const ng = ctx.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
+        ng.gain.setValueAtTime(0.9, now); ng.gain.exponentialRampToValueAtTime(0.001, now+0.22);
+        const o = ctx.createOscillator(), og = ctx.createGain();
+        o.type='triangle'; o.frequency.value=190*p; o.connect(og); og.connect(ctx.destination);
+        og.gain.setValueAtTime(0.45, now); og.gain.exponentialRampToValueAtTime(0.001, now+0.12);
+        ns.start(now); ns.stop(now+0.25); o.start(now); o.stop(now+0.12);
+      },
+      hihat: ctx => {
+        const now = ctx.currentTime;
+        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.10);
+        const f = ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
+        const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.55, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.09);
+        ns.start(now); ns.stop(now+0.10);
+      },
+      clap: ctx => {
+        const now = ctx.currentTime;
+        [0, 0.012, 0.024].forEach(off => {
+          const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.1);
+          const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1100; f.Q.value=0.9;
+          const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
+          g.gain.setValueAtTime(0.7, now+off); g.gain.exponentialRampToValueAtTime(0.001, now+off+0.11);
+          ns.start(now+off); ns.stop(now+off+0.11);
+        });
+      },
+      tom: ctx => {
+        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination); o.type='sine';
+        o.frequency.setValueAtTime(110*p, now); o.frequency.exponentialRampToValueAtTime(55*p, now+0.35);
+        g.gain.setValueAtTime(0.9, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
+        o.start(now); o.stop(now+0.4);
+      },
+      openhi: ctx => {
+        const now = ctx.currentTime;
+        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.55);
+        const f = ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=6000;
+        const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.45, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
+        ns.start(now); ns.stop(now+0.55);
+      },
+      crash: ctx => {
+        const now = ctx.currentTime;
+        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 1.4);
+        const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=4800; f.Q.value=0.3;
+        const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.75, now); g.gain.exponentialRampToValueAtTime(0.001, now+1.4);
+        ns.start(now); ns.stop(now+1.4);
+      },
+      rim: ctx => {
+        const now = ctx.currentTime, p = 0.5 + getKnobVal('knob-pitch') * 1.5;
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type='square'; o.frequency.value=750*p; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.35, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.05);
+        o.start(now); o.stop(now+0.05);
+      }
+    };
+
+    document.getElementById('beat-grid').addEventListener('pointerdown', e => {
+      const btn = e.target.closest('.beat-btn');
+      if (!btn) return;
+      const fn = BEAT[btn.dataset.sound];
+      if (fn) fn(getAudioCtx());
+      btn.classList.add('flash');
+      setTimeout(() => btn.classList.remove('flash'), 110);
+    });
+
+    // ── Draaiknoppen ─────────────────────────────────────────
+    document.querySelectorAll('.knob').forEach(knob => {
+      let startY = 0, startVal = 0;
+      const dot = knob.querySelector('.knob-dot');
+      const setAngle = v => { dot.style.transform = `translateX(-50%) rotate(${-135 + v * 270}deg)`; };
+      setAngle(parseFloat(knob.dataset.val));
+      knob.addEventListener('pointerdown', e => {
+        e.preventDefault(); knob.setPointerCapture(e.pointerId);
+        startY = e.clientY; startVal = parseFloat(knob.dataset.val);
+      });
+      knob.addEventListener('pointermove', e => {
+        if (!knob.hasPointerCapture(e.pointerId)) return;
+        const v = Math.max(0, Math.min(1, startVal + (startY - e.clientY) / 140));
+        knob.dataset.val = v.toFixed(3); setAngle(v);
+      });
+    });
   </script>
 </body>
 </html>
