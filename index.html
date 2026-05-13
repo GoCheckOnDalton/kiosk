@@ -7,10 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
     :root {
-      --open-a:  #14532d;
-      --open-b:  #16a34a;
-      --clos-a:  #7f1d1d;
-      --clos-b:  #dc2626;
+      --open-a:  #ffe000;
+      --open-b:  #799f0c;
+      --clos-a:  #ff512f;
+      --clos-b:  #dd2476;
       --glass:   rgba(0,0,0,0.22);
       --border:  rgba(255,255,255,0.14);
       --font:    'Barlow Condensed', 'Arial Narrow', sans-serif;
@@ -82,6 +82,8 @@
     body.status-open #status-word {
       letter-spacing: 1.05em;
       margin-right: -1.05em;
+      color: #1e2d00;
+      text-shadow: 0 4px 24px rgba(255,255,255,0.18);
     }
 
     /* ── Slider row — slider only ── */
@@ -162,12 +164,15 @@
 
     #f-submit {
       padding: 0.6rem; min-height: 40px;
-      background: rgba(255,255,255,0.92); color: #7f1d1d;
+      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
+      background-size: 200% auto; background-position: left center;
+      color: #fff;
       font-size: 1rem; letter-spacing: 0.14em;
       border: none; border-radius: 12px; cursor: pointer;
-      transition: transform 0.12s;
+      box-shadow: 0 0 16px rgba(0,0,0,0.25);
+      transition: background-position 0.5s, transform 0.12s;
     }
-    body.status-open #f-submit { color: #14532d; }
+    #f-submit:hover  { background-position: right center; }
     #f-submit:active { transform: scale(0.94); }
 
     @keyframes flash {
@@ -676,21 +681,22 @@
       align-items: center; justify-content: center;
       gap: 0.55rem;
       padding: 0.55rem 1.4rem;
-      background: rgba(255,255,255,0.10);
-      border: 1.5px solid rgba(255,255,255,0.28);
-      border-radius: 50px;
-      color: rgba(255,255,255,0.82);
+      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
+      background-size: 200% auto; background-position: left center;
+      border: none; border-radius: 50px;
+      color: #fff;
       font-family: var(--font);
       cursor: pointer;
       margin-bottom: 0.5rem;
-      transition: background 0.18s, border-color 0.18s, transform 0.12s;
+      box-shadow: 0 0 16px rgba(0,0,0,0.25);
+      transition: background-position 0.5s, transform 0.12s;
     }
     #faq-btn .faq-btn-icon { font-size: 1.5rem; line-height: 1; }
     #faq-btn .faq-btn-label {
       font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
       text-align: center; line-height: 1;
     }
-    #faq-btn:hover   { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.50); }
+    #faq-btn:hover   { background-position: right center; }
     #faq-btn:active  { transform: scale(0.95); }
 
     /* ── Knoppen-rij onder slider ── */
@@ -706,20 +712,24 @@
       align-items: center; justify-content: center;
       gap: 0.55rem;
       padding: 0.55rem 1.4rem;
-      background: rgba(255,255,255,0.10);
-      border: 1.5px solid rgba(255,255,255,0.28);
-      border-radius: 50px;
-      color: rgba(255,255,255,0.82);
+      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
+      background-size: 200% auto; background-position: left center;
+      border: none; border-radius: 50px;
+      color: #fff;
       font-family: var(--font);
       cursor: pointer;
-      transition: background 0.18s, border-color 0.18s, transform 0.12s;
+      box-shadow: 0 0 16px rgba(0,0,0,0.25);
+      transition: background-position 0.5s, transform 0.12s;
+    }
+    body.status-open #game-btn {
+      background-image: linear-gradient(to right, #1CD8D2 0%, #93EDC7 51%, #1CD8D2 100%);
     }
     #game-btn .game-btn-icon  { font-size: 1.5rem; line-height: 1; }
     #game-btn .game-btn-label {
       font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
       text-align: center; line-height: 1;
     }
-    #game-btn:hover  { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.50); }
+    #game-btn:hover  { background-position: right center; }
     #game-btn:active { transform: scale(0.95); }
 
     /* ── FAQ Modal — full screen, accessible ── */
