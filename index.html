@@ -1698,11 +1698,9 @@
   </div>
 
   <script>
-  /* Offline runner — leerling met brugklas rugzak
-     Springen over: staande DALTON logo-blokken
-     Bukken voor:  vliegende DALTON logo-balken
-     Achtergrond:  parallax DALTON DEN HAAG logo's
-     Trigger:      window offline   |  Alt+G om te testen  |  Escape om te sluiten */
+  /* Offline runner v2 — leerling (2× groter), pixel-art flora parallax,
+     gebouwen + 2 vijanden: Vos (score 600) en Kraai (score 1200)
+     Trigger: window offline | Alt+G testen | Escape sluiten */
   (function () {
     const OL = document.getElementById('dino-overlay');
     const CV = document.getElementById('dino-canvas');
@@ -1721,17 +1719,17 @@
     let score = 0, best = +localStorage.getItem('dino-best') || 0;
     let spd = 5, tick = 0, raf = null;
 
-    // ── Player ───────────────────────────────────────────────
+    // ── Player (2× groter) ───────────────────────────────────
     const P = { x: 100, y: 0, vy: 0, duck: false, grounded: true,
-                W: 42, H: 62, dW: 52, dH: 32 };
+                W: 84, H: 124, dW: 104, dH: 64 };
     const pw = () => P.duck ? P.dW : P.W;
     const ph = () => P.duck ? P.dH : P.H;
 
     function pReset() { P.y = GND - ph(); P.vy = 0; P.duck = false; P.grounded = true; }
-    function pJump()  { if (!P.grounded) return; P.vy = -16; P.grounded = false; }
+    function pJump()  { if (!P.grounded) return; P.vy = -22; P.grounded = false; }
     function pUpdate() {
       if (!P.grounded) {
-        P.vy += 0.75; P.y += P.vy;
+        P.vy += 0.85; P.y += P.vy;
         if (P.y >= GND - ph()) { P.y = GND - ph(); P.vy = 0; P.grounded = true; }
       } else {
         P.y = GND - ph();
@@ -1739,243 +1737,316 @@
     }
 
     // ── Obstacles ────────────────────────────────────────────
+    // Billboard: y=GND-132, h=58  → duck player (GND-64) top+10=GND-54 < bottom-10=GND-84? NO → safe
+    // Crow:      y=GND-135, h=50  → duck player top+10=GND-54 < bottom-10=GND-95?       NO → safe
     let obs = [], nextObs = 100;
     function spawnObs() {
-      if (Math.random() < 0.55) {
-        const h = 58 + Math.random() * 18;
-        obs.push({ x: W + 20, y: GND - h, w: 42, h });       // staand — spring
-      } else {
-        obs.push({ x: W + 20, y: GND - 74, w: 70, h: 36 });  // vliegend — buk
+      const canFox  = score > 600;
+      const canCrow = score > 1200;
+      const pool = ['bld','bld','bld','bld','bill','bill'];
+      if (canFox)  pool.push('fox','fox');
+      if (canCrow) pool.push('crow','crow');
+      const type = pool[Math.floor(Math.random() * pool.length)];
+      switch (type) {
+        case 'bld': {
+          const h = 90 + Math.random() * 65;
+          obs.push({ x: W+20, y: GND-h, w: 55+Math.random()*35, h, type }); break;
+        }
+        case 'bill':
+          obs.push({ x: W+20, y: GND-132, w: 90, h: 58, type }); break;
+        case 'fox': {
+          const h = 58 + Math.random() * 14;
+          obs.push({ x: W+20, y: GND-h, w: 72, h, type }); break;
+        }
+        case 'crow':
+          obs.push({ x: W+20, y: GND-135, w: 72, h: 50, type }); break;
       }
-      nextObs = 80 + Math.random() * 170;
+      nextObs = Math.max(45, 100 + Math.random()*120 - score/100);
     }
 
-    // ── Parallax ─────────────────────────────────────────────
-    const PX = [
-      { ox: 0,   sp: 0.22, al: 0.030, sc: 4.0, ry: 0.06 },
-      { ox: 500, sp: 0.55, al: 0.055, sc: 2.2, ry: 0.50 },
-      { ox: 150, sp: 1.0,  al: 0.085, sc: 1.3, ry: 0.22 },
-    ];
+    // ── Parallax flora ───────────────────────────────────────
+    let flora = { far:[], mid:[], near:[] };
+    let poff  = { far:0, mid:0, near:0 };
+    function initFlora() {
+      flora.far = [];
+      for (let x=0; x<3000; x += 140+Math.random()*80)
+        flora.far.push({ x, h: 70+Math.random()*50, t:'pine' });
+      flora.mid = [];
+      for (let x=0; x<2400; x += 110+Math.random()*90)
+        flora.mid.push({ x, h: 55+Math.random()*40, t: Math.random()<0.55?'pine':'oak' });
+      flora.near = [];
+      for (let x=0; x<1600; x += 75+Math.random()*55)
+        flora.near.push({ x, h: 18+Math.random()*14, t:'bush' });
+      poff = { far:0, mid:0, near:0 };
+    }
 
-    // ── roundRect helper ─────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────
     function rr(x, y, w, h, r) {
       if (CX.roundRect) { CX.beginPath(); CX.roundRect(x, y, w, h, r); return; }
       CX.beginPath();
-      CX.moveTo(x + r, y);
-      CX.arcTo(x + w, y,     x + w, y + r,     r);
-      CX.arcTo(x + w, y + h, x + w - r, y + h, r);
-      CX.arcTo(x, y + h,     x, y + h - r,     r);
-      CX.arcTo(x, y,         x + r, y,         r);
-      CX.closePath();
+      CX.moveTo(x+r,y); CX.arcTo(x+w,y,x+w,y+r,r); CX.arcTo(x+w,y+h,x+w-r,y+h,r);
+      CX.arcTo(x,y+h,x,y+h-r,r); CX.arcTo(x,y,x+r,y,r); CX.closePath();
     }
 
-    // ── DALTON DEN HAAG logo blok ─────────────────────────────
-    function drawLogo(x, y, w, h, a) {
+    // ── Flora (pixel-art) ─────────────────────────────────────
+    function drawPine(x, baseY, h, a) {
       CX.save(); CX.globalAlpha = a;
-      const rad = Math.min(8, Math.min(w, h) * 0.12);
-      rr(x, y, w, h, rad); CX.clip();
-      CX.fillStyle = '#fff'; CX.fillRect(x, y, w, h);
-      const portrait = h > w;
-      if (portrait) {
-        // Staand logo-blok (springen)
-        CX.fillStyle = '#1a3a6b'; CX.fillRect(x, y, w, h * 0.42);
-        CX.fillStyle = '#fff';
-        CX.font = `bold ${Math.max(8, w * 0.68)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.textAlign = 'center'; CX.textBaseline = 'middle';
-        CX.fillText('D', x + w / 2, y + h * 0.21);
-        CX.fillStyle = '#1a3a6b';
-        CX.font = `bold ${Math.max(6, w * 0.44)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.fillText('ALTON', x + w / 2, y + h * 0.57);
-        CX.font = `${Math.max(5, w * 0.24)}px 'Barlow Condensed',sans-serif`;
-        CX.fillStyle = '#4a6a9b';
-        CX.fillText('DEN HAAG', x + w / 2, y + h * 0.78);
-      } else {
-        // Liggend logo-balk (bukken)
-        CX.fillStyle = '#1a3a6b'; CX.fillRect(x, y, w * 0.32, h);
-        CX.fillStyle = '#fff';
-        CX.font = `bold ${Math.max(8, h * 0.60)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.textAlign = 'center'; CX.textBaseline = 'middle';
-        CX.fillText('D', x + w * 0.16, y + h * 0.5);
-        CX.fillStyle = '#1a3a6b';
-        CX.font = `bold ${Math.max(7, h * 0.35)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.textAlign = 'left';
-        CX.fillText('ALTON', x + w * 0.36, y + h * 0.35);
-        CX.font = `${Math.max(5, h * 0.20)}px 'Barlow Condensed',sans-serif`;
-        CX.fillStyle = '#4a6a9b';
-        CX.fillText('DEN HAAG', x + w * 0.36, y + h * 0.72);
+      const tw = Math.max(4, h*0.10), th = h*0.22, cw = h*0.55;
+      CX.fillStyle = '#5C3A1E'; CX.fillRect(x-tw/2, baseY-th, tw, th);
+      for (let i=0; i<5; i++) {
+        const lw = cw*(5-i)/5, ly = baseY-th-h*0.78*(i+1)/5;
+        CX.fillStyle = i%2===0 ? '#1E5C14' : '#267A1C';
+        CX.fillRect(x-lw/2, ly, lw, h*0.78/5*1.3);
       }
       CX.restore();
     }
+    function drawOak(x, baseY, h, a) {
+      CX.save(); CX.globalAlpha = a;
+      const tw = Math.max(4, h*0.10), th = h*0.38, cr = h*0.38;
+      CX.fillStyle = '#6B4226'; CX.fillRect(x-tw/2, baseY-th, tw, th);
+      CX.fillStyle = '#267020';
+      CX.fillRect(x-cr, baseY-th-cr*1.1, cr*2, cr*1.1);
+      CX.fillRect(x-cr*0.7, baseY-th-cr*1.55, cr*1.4, cr*0.5);
+      CX.fillStyle = '#338A28';
+      CX.fillRect(x-cr*0.6, baseY-th-cr*1.2, cr*0.5, cr*0.4);
+      CX.restore();
+    }
+    function drawBush(x, baseY, h, a) {
+      CX.save(); CX.globalAlpha = a;
+      CX.fillStyle = '#1A6010';
+      CX.fillRect(x-h, baseY-h*0.65, h*2, h*0.65);
+      CX.fillRect(x-h*0.6, baseY-h, h*1.2, h*0.4);
+      CX.fillStyle = '#228018';
+      CX.fillRect(x-h*0.7, baseY-h*0.8, h*0.4, h*0.3);
+      CX.restore();
+    }
 
-    // ── Leerling karakter ─────────────────────────────────────
+    // ── Obstakels ─────────────────────────────────────────────
+    function drawBuilding(x, y, w, h) {
+      CX.fillStyle = '#7A8A9A'; CX.fillRect(x, y, w, h);
+      CX.fillStyle = '#4A5A6A'; CX.fillRect(x, y, w, 6);
+      CX.fillStyle = 'rgba(0,0,0,0.18)'; CX.fillRect(x+w-5, y+6, 5, h-6);
+      const cols = Math.max(1, Math.floor(w/18)), rows = Math.max(1, Math.floor((h-12)/22));
+      for (let c=0; c<cols; c++) for (let r=0; r<rows; r++) {
+        CX.fillStyle = (c*3+r*5)%7!==0 ? '#FFE87C' : '#2A3040';
+        CX.fillRect(x+5+c*18, y+10+r*22, 10, 12);
+      }
+    }
+    function drawBillboard(x, y, w, h) {
+      CX.fillStyle = '#888';
+      CX.fillRect(x+w*0.2-3, y+h, 6, GND-y-h+2);
+      CX.fillRect(x+w*0.8-3, y+h, 6, GND-y-h+2);
+      CX.fillStyle = '#F0E8D0'; CX.fillRect(x, y, w, h);
+      CX.fillStyle = '#C8B880'; CX.fillRect(x, y, w, 5); CX.fillRect(x, y+h-5, w, 5);
+      CX.fillStyle = '#1a3a6b';
+      CX.font = `bold ${Math.max(10,h*0.44)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+      CX.textAlign = 'center'; CX.textBaseline = 'middle';
+      CX.fillText('DALTON', x+w/2, y+h*0.38);
+      CX.font = `${Math.max(7,h*0.24)}px 'Barlow Condensed',sans-serif`;
+      CX.fillText('DEN HAAG', x+w/2, y+h*0.72);
+    }
+
+    // ── Vijanden ──────────────────────────────────────────────
+    function drawFox(x, y, h) {
+      const bY = y+h, sw = Math.sin(tick*0.38)*6;
+      CX.save();
+      CX.fillStyle = '#E8630A';
+      CX.beginPath(); CX.ellipse(x+h*0.12, bY-h*0.42, h*0.26, h*0.16, -0.4, 0, Math.PI*2); CX.fill();
+      CX.fillStyle = '#fff';
+      CX.beginPath(); CX.ellipse(x+h*0.09, bY-h*0.42, h*0.11, h*0.07, -0.4, 0, Math.PI*2); CX.fill();
+      CX.fillStyle = '#E8630A'; rr(x+h*0.26, bY-h*0.62, h*0.64, h*0.40, h*0.08); CX.fill();
+      CX.fillStyle = '#fff';    rr(x+h*0.38, bY-h*0.55, h*0.35, h*0.30, h*0.06); CX.fill();
+      CX.fillStyle = '#E8630A'; rr(x+h*0.64, bY-h*0.82, h*0.36, h*0.38, h*0.09); CX.fill();
+      CX.fillStyle = '#fff';    rr(x+h*0.84, bY-h*0.67, h*0.22, h*0.20, h*0.05); CX.fill();
+      CX.fillStyle = '#333'; CX.beginPath(); CX.arc(x+h*1.02, bY-h*0.60, h*0.04, 0, Math.PI*2); CX.fill();
+      CX.fillStyle = '#222'; CX.beginPath(); CX.arc(x+h*0.76,  bY-h*0.76, h*0.045, 0, Math.PI*2); CX.fill();
+      CX.fillStyle = '#E8630A';
+      CX.beginPath(); CX.moveTo(x+h*0.66,bY-h*0.80); CX.lineTo(x+h*0.60,bY-h*1.02); CX.lineTo(x+h*0.76,bY-h*0.88); CX.fill();
+      CX.beginPath(); CX.moveTo(x+h*0.82,bY-h*0.80); CX.lineTo(x+h*0.82,bY-h*1.02); CX.lineTo(x+h*0.96,bY-h*0.86); CX.fill();
+      CX.fillStyle = '#C44A00';
+      rr(x+h*0.30,bY-h*0.25,h*0.12,h*0.25+sw,h*0.03); CX.fill();
+      rr(x+h*0.46,bY-h*0.25,h*0.12,h*0.25-sw,h*0.03); CX.fill();
+      rr(x+h*0.62,bY-h*0.25,h*0.12,h*0.25+sw,h*0.03); CX.fill();
+      rr(x+h*0.78,bY-h*0.25,h*0.12,h*0.25-sw,h*0.03); CX.fill();
+      CX.restore();
+    }
+    function drawCrow(x, y, w, h) {
+      const cx2 = x+w*0.5, cy2 = y+h*0.5, wf = Math.sin(tick*0.22)*0.7;
+      CX.save();
+      CX.fillStyle = '#18182A';
+      CX.beginPath(); CX.ellipse(cx2+w*0.05, cy2+h*0.10, w*0.30, h*0.28, 0, 0, Math.PI*2); CX.fill();
+      CX.fillStyle = '#101020';
+      CX.beginPath(); CX.moveTo(cx2+w*0.32,cy2+h*0.08); CX.lineTo(x+w+8,cy2); CX.lineTo(x+w+8,cy2+h*0.22); CX.lineTo(cx2+w*0.32,cy2+h*0.22); CX.fill();
+      CX.save(); CX.translate(cx2-w*0.08, cy2-h*0.05); CX.rotate(wf-0.2);
+      CX.fillStyle='#202038'; CX.beginPath(); CX.ellipse(-w*0.28,-h*0.15,w*0.32,h*0.14,0.3,0,Math.PI*2); CX.fill(); CX.restore();
+      CX.save(); CX.translate(cx2+w*0.18, cy2-h*0.05); CX.rotate(-(wf-0.2));
+      CX.fillStyle='#202038'; CX.beginPath(); CX.ellipse(w*0.22,-h*0.15,w*0.28,h*0.12,-0.3,0,Math.PI*2); CX.fill(); CX.restore();
+      CX.fillStyle='#18182A'; CX.beginPath(); CX.arc(cx2-w*0.28,cy2-h*0.08,h*0.24,0,Math.PI*2); CX.fill();
+      CX.fillStyle='#777766'; CX.beginPath(); CX.moveTo(cx2-w*0.48,cy2-h*0.08); CX.lineTo(cx2-w*0.62,cy2-h*0.02); CX.lineTo(cx2-w*0.48,cy2+h*0.10); CX.fill();
+      CX.fillStyle='#fff'; CX.beginPath(); CX.arc(cx2-w*0.32,cy2-h*0.14,h*0.07,0,Math.PI*2); CX.fill();
+      CX.fillStyle='#111'; CX.beginPath(); CX.arc(cx2-w*0.33,cy2-h*0.14,h*0.04,0,Math.PI*2); CX.fill();
+      CX.restore();
+    }
+
+    // ── Leerling karakter (2×) ────────────────────────────────
     function drawStudent(x, y) {
-      const dk = P.duck, t = tick;
-      const SKIN='#f4a261', HAIR='#2a1a0a', SHIRT='#457b9d',
-            PANTS='#1d3557', SHOE='#e8e0d0', BP1='#e63946', BP2='#c1121f';
+      const dk = P.duck;
+      const SKIN='#f4a261',HAIR='#2a1a0a',SHIRT='#457b9d',PANTS='#1d3557',SHOE='#e8e0d0',BP1='#e63946',BP2='#c1121f';
       CX.save();
       if (!dk) {
-        const sw = Math.sin(t * 0.30) * 9;
-        // Rugzak (links, achter lichaam — heel groot!)
-        CX.fillStyle = BP1; rr(x + 1, y + 13, 20, 36, 4); CX.fill();
-        CX.fillStyle = BP2; rr(x + 4, y + 22, 12, 13, 2); CX.fill();
-        // Schouderriem zichtbaar
-        CX.strokeStyle = BP2; CX.lineWidth = 2.5;
-        CX.beginPath(); CX.moveTo(x + 13, y + 15); CX.lineTo(x + 20, y + 20); CX.stroke();
-        // Lichaam (shirt)
-        CX.fillStyle = SHIRT; rr(x + 19, y + 18, 18, 24, 3); CX.fill();
-        // Hoofd
-        CX.fillStyle = SKIN; CX.beginPath(); CX.arc(x + 28, y + 11, 11, 0, Math.PI * 2); CX.fill();
-        // Haar
-        CX.fillStyle = HAIR; CX.beginPath(); CX.ellipse(x + 28, y + 3, 11, 7, 0, Math.PI, Math.PI * 2); CX.fill();
-        // Ogen
-        CX.fillStyle = '#333'; CX.fillRect(x + 23, y + 9, 3, 3); CX.fillRect(x + 30, y + 9, 3, 3);
-        // Benen (lopende animatie)
-        CX.fillStyle = PANTS;
-        rr(x + 20, y + 40, 7, 16 + sw, 2); CX.fill();
-        rr(x + 29, y + 40, 7, 16 - sw, 2); CX.fill();
-        // Schoenen
-        CX.fillStyle = SHOE;
-        CX.fillRect(x + 18, y + 54 + sw, 11, 5);
-        CX.fillRect(x + 27, y + 54 - sw, 11, 5);
+        const sw = Math.sin(tick*0.28)*18;
+        CX.fillStyle=BP1;  rr(x+2,  y+26, 40, 72, 8); CX.fill();
+        CX.fillStyle=BP2;  rr(x+8,  y+44, 24, 26, 4); CX.fill();
+        CX.strokeStyle=BP2; CX.lineWidth=5;
+        CX.beginPath(); CX.moveTo(x+28,y+30); CX.lineTo(x+42,y+42); CX.stroke();
+        CX.fillStyle=SHIRT; rr(x+38, y+36, 36, 48, 6); CX.fill();
+        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+56,y+22,22,0,Math.PI*2); CX.fill();
+        CX.fillStyle=HAIR;  CX.beginPath(); CX.ellipse(x+56,y+6,22,14,0,Math.PI,Math.PI*2); CX.fill();
+        CX.fillStyle='#333'; CX.fillRect(x+46,y+18,6,6); CX.fillRect(x+60,y+18,6,6);
+        CX.strokeStyle='#333'; CX.lineWidth=2;
+        CX.beginPath(); CX.arc(x+56,y+26,7,0.2,Math.PI-0.2); CX.stroke();
+        CX.fillStyle=PANTS;
+        rr(x+40,y+80,14,32+sw,4); CX.fill();
+        rr(x+58,y+80,14,32-sw,4); CX.fill();
+        CX.fillStyle=SHOE;
+        CX.fillRect(x+36,y+110+sw,22,10); CX.fillRect(x+54,y+110-sw,22,10);
       } else {
-        // Gebukt — rugzak nog prominenter
-        CX.fillStyle = BP1; rr(x + 1, y + 3, 24, 24, 4); CX.fill();
-        CX.fillStyle = BP2; rr(x + 5, y + 10, 15, 10, 2); CX.fill();
-        // Lichaam platgedrukt
-        CX.fillStyle = SHIRT; rr(x + 21, y + 7, 22, 15, 3); CX.fill();
-        // Hoofd voorovergebogen
-        CX.fillStyle = SKIN; CX.beginPath(); CX.arc(x + 39, y + 7, 9, 0, Math.PI * 2); CX.fill();
-        CX.fillStyle = HAIR; CX.beginPath(); CX.ellipse(x + 39, y + 1, 9, 5, -0.2, Math.PI, Math.PI * 2); CX.fill();
-        CX.fillStyle = '#333'; CX.fillRect(x + 34, y + 5, 2.5, 2.5); CX.fillRect(x + 40, y + 5, 2.5, 2.5);
-        // Geknepen benen
-        CX.fillStyle = PANTS;
-        rr(x + 23, y + 20, 8, 10, 2); CX.fill();
-        rr(x + 33, y + 20, 8, 10, 2); CX.fill();
-        CX.fillStyle = SHOE;
-        CX.fillRect(x + 21, y + 28, 12, 4); CX.fillRect(x + 31, y + 28, 12, 4);
+        CX.fillStyle=BP1;  rr(x+2,  y+6,  48, 48, 8); CX.fill();
+        CX.fillStyle=BP2;  rr(x+10, y+20, 30, 20, 4); CX.fill();
+        CX.fillStyle=SHIRT; rr(x+44, y+14, 44, 30, 6); CX.fill();
+        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+78,y+14,18,0,Math.PI*2); CX.fill();
+        CX.fillStyle=HAIR;  CX.beginPath(); CX.ellipse(x+78,y+2,18,10,-0.2,Math.PI,Math.PI*2); CX.fill();
+        CX.fillStyle='#333'; CX.fillRect(x+68,y+10,5,5); CX.fillRect(x+80,y+10,5,5);
+        CX.fillStyle=PANTS;
+        rr(x+46,y+40,16,20,4); CX.fill(); rr(x+66,y+40,16,20,4); CX.fill();
+        CX.fillStyle=SHOE; CX.fillRect(x+42,y+58,24,8); CX.fillRect(x+62,y+58,24,8);
       }
       CX.restore();
     }
 
     // ── Collision ─────────────────────────────────────────────
     function hits(o) {
-      const m = 6;
-      return (P.x + m)        < (o.x + o.w - m) &&
-             (P.x + pw() - m) > (o.x + m)        &&
-             (P.y + m)        < (o.y + o.h - m)  &&
-             (P.y + ph() - m) > (o.y + m);
+      const m = 10;
+      return (P.x+m) < (o.x+o.w-m) && (P.x+pw()-m) > (o.x+m) &&
+             (P.y+m) < (o.y+o.h-m) && (P.y+ph()-m) > (o.y+m);
     }
 
     // ── Loop ──────────────────────────────────────────────────
     function update() {
+      const ps = gs === S.RUN ? spd : 1.5;
+      poff.far  += ps * 0.15;
+      poff.mid  += ps * 0.42;
+      poff.near += ps * 0.80;
       if (gs !== S.RUN) return;
       tick++; score++; spd = 5 + score * 0.0013;
       pUpdate();
       nextObs--; if (nextObs <= 0) spawnObs();
-      obs.forEach(o => o.x -= spd);
+      obs.forEach(o => { o.x -= o.type === 'fox' ? spd * 1.3 + 1 : spd; });
       obs = obs.filter(o => o.x + o.w > -10);
       if (obs.some(hits)) {
         gs = S.DEAD;
         if (score > best) { best = score; localStorage.setItem('dino-best', best); }
       }
-      PX.forEach(l => { l.ox -= spd * l.sp; });
     }
 
     function draw() {
       CX.clearRect(0, 0, W, H);
-      // Achtergrond
-      const bg = CX.createLinearGradient(0, 0, 0, H);
-      bg.addColorStop(0, '#0d1422'); bg.addColorStop(1, '#1b2a4a');
-      CX.fillStyle = bg; CX.fillRect(0, 0, W, H);
+      const sky = CX.createLinearGradient(0,0,0,H);
+      sky.addColorStop(0,'#0d1830'); sky.addColorStop(0.65,'#1e3060'); sky.addColorStop(1,'#0a1020');
+      CX.fillStyle = sky; CX.fillRect(0,0,W,H);
+      CX.fillStyle = 'rgba(255,255,255,0.5)';
+      for (let i=0;i<45;i++) CX.fillRect((i*137+71)%W, (i*83+17)%(H*0.50), 1.5,1.5);
 
-      // Parallax DALTON logo's
-      PX.forEach(l => {
-        const lw = 200 * l.sc, lh = 80 * l.sc, gap = lw * 0.85;
-        const sx = (l.ox % (lw + gap)) - lw - gap;
-        for (let x = sx; x < W; x += lw + gap) drawLogo(x, H * l.ry, lw, lh, l.al);
+      // Far trees
+      const fR=3000; flora.far.forEach(it => {
+        const dx = ((it.x-poff.far)%fR+fR)%fR-200;
+        if (dx>-150&&dx<W+150) drawPine(dx, GND, it.h*0.6, 0.14);
       });
+      // Mid trees
+      const mR=2400; flora.mid.forEach(it => {
+        const dx = ((it.x-poff.mid)%mR+mR)%mR-150;
+        if (dx>-120&&dx<W+120) it.t==='pine' ? drawPine(dx,GND,it.h,0.28) : drawOak(dx,GND,it.h,0.28);
+      });
+      // Ground
+      CX.fillStyle='rgba(14,30,60,0.55)'; CX.fillRect(0,GND,W,H-GND);
+      // Near bushes
+      const nR=1600; flora.near.forEach(it => {
+        const dx = ((it.x-poff.near)%nR+nR)%nR-80;
+        if (dx>-80&&dx<W+80) drawBush(dx, GND, it.h, 0.50);
+      });
+      CX.strokeStyle='rgba(80,120,180,0.32)'; CX.lineWidth=2;
+      CX.beginPath(); CX.moveTo(0,GND); CX.lineTo(W,GND); CX.stroke();
 
-      // Grondlijn
-      CX.fillStyle = 'rgba(255,255,255,0.04)'; CX.fillRect(0, GND, W, H - GND);
-      CX.strokeStyle = 'rgba(255,255,255,0.28)'; CX.lineWidth = 2;
-      CX.beginPath(); CX.moveTo(0, GND); CX.lineTo(W, GND); CX.stroke();
-
-      // Obstakels
-      obs.forEach(o => drawLogo(o.x, o.y, o.w, o.h, 1));
-
-      // Speler
+      obs.forEach(o => {
+        if (o.type==='bld')   drawBuilding(o.x, o.y, o.w, o.h);
+        else if (o.type==='bill')  drawBillboard(o.x, o.y, o.w, o.h);
+        else if (o.type==='fox')   drawFox(o.x, o.y, o.h);
+        else if (o.type==='crow')  drawCrow(o.x, o.y, o.w, o.h);
+      });
       drawStudent(P.x, P.y);
 
-      // Score
       CX.save();
-      CX.fillStyle = 'rgba(255,255,255,0.80)';
-      CX.font = `bold ${Math.max(14, W * 0.022)}px 'Barlow Condensed',sans-serif`;
-      CX.textAlign = 'right'; CX.textBaseline = 'top';
-      CX.fillText('HI ' + String(best).padStart(5,'0') + '  ' + String(score).padStart(5,'0'), W - 24, 22);
+      CX.fillStyle='rgba(255,255,255,0.80)';
+      CX.font=`bold ${Math.max(14,W*0.022)}px 'Barlow Condensed',sans-serif`;
+      CX.textAlign='right'; CX.textBaseline='top';
+      CX.fillText('HI '+String(best).padStart(5,'0')+'  '+String(score).padStart(5,'0'), W-24, 22);
       CX.restore();
 
-      // Idle / Game-over bericht
+      // Unlock-meldingen
+      const af = `bold ${Math.max(16,W*0.028)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+      if (score>=580&&score<=660) {
+        CX.save(); CX.globalAlpha=Math.max(0,1-Math.abs(score-620)/40);
+        CX.fillStyle='#FFB020'; CX.font=af; CX.textAlign='center'; CX.textBaseline='top';
+        CX.fillText('🦊 DE VOS IS IN HET VELD!', W/2, H*0.06); CX.restore();
+      }
+      if (score>=1180&&score<=1260) {
+        CX.save(); CX.globalAlpha=Math.max(0,1-Math.abs(score-1220)/40);
+        CX.fillStyle='#C090FF'; CX.font=af; CX.textAlign='center'; CX.textBaseline='top';
+        CX.fillText('🐦 DE KRAAI VLIEGT MEE!', W/2, H*0.06); CX.restore();
+      }
       if (gs !== S.RUN) {
-        CX.save(); CX.textAlign = 'center';
-        CX.fillStyle = 'rgba(255,255,255,0.92)';
-        CX.font = `bold ${Math.max(26, W * 0.042)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.textBaseline = 'middle';
-        CX.fillText(gs === S.DEAD ? 'GAME OVER' : 'GEEN INTERNET', W / 2, H * 0.43);
-        CX.fillStyle = 'rgba(255,255,255,0.55)';
-        CX.font = `${Math.max(14, W * 0.021)}px 'Barlow Condensed',sans-serif`;
-        CX.fillText('Tik of druk SPATIE om te spelen', W / 2, H * 0.52);
-        CX.restore();
+        CX.save(); CX.textAlign='center'; CX.textBaseline='middle';
+        CX.fillStyle='rgba(255,255,255,0.92)';
+        CX.font=`bold ${Math.max(26,W*0.042)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
+        CX.fillText(gs===S.DEAD?'GAME OVER':'GEEN INTERNET', W/2, H*0.43);
+        CX.fillStyle='rgba(255,255,255,0.55)';
+        CX.font=`${Math.max(14,W*0.021)}px 'Barlow Condensed',sans-serif`;
+        CX.fillText('Tik of druk SPATIE om te spelen', W/2, H*0.52); CX.restore();
       }
     }
 
     function loop() { update(); draw(); raf = requestAnimationFrame(loop); }
 
     function startGame() {
-      score = 0; spd = 5; tick = 0; obs = []; nextObs = 100;
-      pReset(); gs = S.RUN;
+      score=0; spd=5; tick=0; obs=[]; nextObs=100; pReset(); gs=S.RUN;
     }
-
     function show() {
-      OL.classList.add('active');
-      resize(); pReset(); gs = S.IDLE;
+      OL.classList.add('active'); resize(); initFlora(); pReset(); gs=S.IDLE;
       if (!raf) raf = requestAnimationFrame(loop);
     }
     function hide() {
       OL.classList.remove('active');
-      if (raf) { cancelAnimationFrame(raf); raf = null; }
-      gs = S.IDLE;
+      if (raf) { cancelAnimationFrame(raf); raf=null; } gs=S.IDLE;
     }
 
-    // ── Input ─────────────────────────────────────────────────
     document.addEventListener('keydown', e => {
       if (!OL.classList.contains('active')) return;
-      if (e.code === 'Space' || e.code === 'ArrowUp') {
-        e.preventDefault();
-        if (gs !== S.RUN) startGame(); else pJump();
-      }
-      if (e.code === 'ArrowDown') { e.preventDefault(); P.duck = true; }
-      if (e.code === 'Escape') hide();
+      if (e.code==='Space'||e.code==='ArrowUp') { e.preventDefault(); if (gs!==S.RUN) startGame(); else pJump(); }
+      if (e.code==='ArrowDown') { e.preventDefault(); P.duck=true; }
+      if (e.code==='Escape') hide();
     });
-    document.addEventListener('keyup', e => { if (e.code === 'ArrowDown') P.duck = false; });
+    document.addEventListener('keyup', e => { if (e.code==='ArrowDown') P.duck=false; });
     OL.addEventListener('pointerdown', e => {
-      if (gs !== S.RUN) { startGame(); return; }
-      e.clientY > OL.clientHeight * 0.58 ? (P.duck = true) : pJump();
+      if (gs!==S.RUN) { startGame(); return; }
+      e.clientY > OL.clientHeight*0.58 ? (P.duck=true) : pJump();
     });
-    OL.addEventListener('pointerup', () => { P.duck = false; });
-    window.addEventListener('resize', () => {
-      if (OL.classList.contains('active')) { resize(); if (gs !== S.RUN) pReset(); }
-    });
+    OL.addEventListener('pointerup', () => { P.duck=false; });
+    window.addEventListener('resize', () => { if (OL.classList.contains('active')) { resize(); if (gs!==S.RUN) pReset(); } });
 
-    // Knop-toegang
     window.toggleDinoGame = () => OL.classList.contains('active') ? hide() : show();
-
-    // Trigger
     window.addEventListener('offline', show);
     window.addEventListener('online',  hide);
-    // Alt+G = test
-    document.addEventListener('keydown', e => {
-      if (e.altKey && e.code === 'KeyG') OL.classList.contains('active') ? hide() : show();
-    });
+    document.addEventListener('keydown', e => { if (e.altKey&&e.code==='KeyG') OL.classList.contains('active')?hide():show(); });
     if (!navigator.onLine) show();
   })();
   </script>
