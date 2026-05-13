@@ -1934,38 +1934,90 @@
       CX.restore();
     }
 
-    // ── Leerling karakter (2×) ────────────────────────────────
+    // ── Zelda-type held: zilver harnas, lang haar, puntoren, zwaard ──
     function drawStudent(x, y) {
       const dk = P.duck;
-      const SKIN='#f4a261',HAIR='#2a1a0a',SHIRT='#457b9d',PANTS='#1d3557',SHOE='#e8e0d0',BP1='#e63946',BP2='#c1121f';
+      const SKIN='#f4d4a0', HAIR='#dcdce8', HAIR2='#b0b0c8',
+            TUNIC='#7a8ea8', CHAIN='#9aaec0', BELT='#5a3c1a',
+            LEGS='#55606e', BOOTS='#3c2814', SILVER='#d4d4e4', GOLD='#c8a020';
       CX.save();
       if (!dk) {
-        const sw = Math.sin(tick*0.28)*18;
-        CX.fillStyle=BP1;  rr(x+2,  y+26, 40, 72, 8); CX.fill();
-        CX.fillStyle=BP2;  rr(x+8,  y+44, 24, 26, 4); CX.fill();
-        CX.strokeStyle=BP2; CX.lineWidth=5;
-        CX.beginPath(); CX.moveTo(x+28,y+30); CX.lineTo(x+42,y+42); CX.stroke();
-        CX.fillStyle=SHIRT; rr(x+38, y+36, 36, 48, 6); CX.fill();
-        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+56,y+22,22,0,Math.PI*2); CX.fill();
-        CX.fillStyle=HAIR;  CX.beginPath(); CX.ellipse(x+56,y+6,22,14,0,Math.PI,Math.PI*2); CX.fill();
-        CX.fillStyle='#333'; CX.fillRect(x+46,y+18,6,6); CX.fillRect(x+60,y+18,6,6);
-        CX.strokeStyle='#333'; CX.lineWidth=2;
-        CX.beginPath(); CX.arc(x+56,y+26,7,0.2,Math.PI-0.2); CX.stroke();
-        CX.fillStyle=PANTS;
-        rr(x+40,y+80,14,32+sw,4); CX.fill();
-        rr(x+58,y+80,14,32-sw,4); CX.fill();
-        CX.fillStyle=SHOE;
-        CX.fillRect(x+36,y+110+sw,22,10); CX.fillRect(x+54,y+110-sw,22,10);
+        const sw = Math.sin(tick*0.28)*16;
+        // Lang haar (achter lichaam, golvend)
+        CX.fillStyle = HAIR2;
+        CX.beginPath();
+        CX.moveTo(x+44,y+12);
+        CX.bezierCurveTo(x+18,y+22,x+10,y+58,x+16,y+90);
+        CX.lineTo(x+30,y+86); CX.bezierCurveTo(x+24,y+60,x+30,y+30,x+50,y+20);
+        CX.closePath(); CX.fill();
+        // Zwaard (rechterhand, schuin omhoog)
+        CX.save(); CX.translate(x+78,y+58); CX.rotate(-0.30);
+        CX.fillStyle=SILVER; CX.fillRect(-3,-38,5,38);
+        CX.fillStyle=GOLD;   CX.fillRect(-9,0,18,4);
+        CX.fillStyle=BELT;   CX.fillRect(-2,4,4,13);
+        CX.restore();
+        // Harnas / tuniek
+        CX.fillStyle=TUNIC; rr(x+36,y+36,34,46,6); CX.fill();
+        CX.fillStyle=CHAIN;
+        [y+41,y+52,y+63,y+72].forEach(ly=>CX.fillRect(x+36,ly,34,3));
+        // Riem + gesp
+        CX.fillStyle=BELT;  CX.fillRect(x+33,y+78,40,7);
+        CX.fillStyle=GOLD;  CX.fillRect(x+50,y+79,8,5);
+        // Hoofd
+        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+54,y+23,21,0,Math.PI*2); CX.fill();
+        // Haar boven
+        CX.fillStyle=HAIR; CX.beginPath(); CX.ellipse(x+54,y+8,22,14,0,Math.PI,Math.PI*2); CX.fill();
+        CX.fillRect(x+33,y+8,10,22);
+        // Puntig oor
+        CX.fillStyle=SKIN;
+        CX.beginPath(); CX.moveTo(x+33,y+19); CX.lineTo(x+25,y+23); CX.lineTo(x+33,y+30); CX.fill();
+        // Ogen (elfachtig, amandelvormig)
+        CX.fillStyle='#1a2840';
+        CX.beginPath(); CX.ellipse(x+46,y+23,4,3,-0.2,0,Math.PI*2); CX.fill();
+        CX.beginPath(); CX.ellipse(x+62,y+23,4,3, 0.2,0,Math.PI*2); CX.fill();
+        CX.fillStyle='rgba(255,255,255,0.55)';
+        CX.beginPath(); CX.arc(x+47,y+22,1.2,0,Math.PI*2); CX.fill();
+        CX.beginPath(); CX.arc(x+63,y+22,1.2,0,Math.PI*2); CX.fill();
+        // Benen
+        CX.fillStyle=LEGS;
+        rr(x+40,y+80,13,30+sw,4); CX.fill();
+        rr(x+57,y+80,13,30-sw,4); CX.fill();
+        // Laarzen
+        CX.fillStyle=BOOTS;
+        CX.fillRect(x+36,y+106+sw,20,14); CX.fillRect(x+53,y+106-sw,20,14);
       } else {
-        CX.fillStyle=BP1;  rr(x+2,  y+6,  48, 48, 8); CX.fill();
-        CX.fillStyle=BP2;  rr(x+10, y+20, 30, 20, 4); CX.fill();
-        CX.fillStyle=SHIRT; rr(x+44, y+14, 44, 30, 6); CX.fill();
-        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+78,y+14,18,0,Math.PI*2); CX.fill();
-        CX.fillStyle=HAIR;  CX.beginPath(); CX.ellipse(x+78,y+2,18,10,-0.2,Math.PI,Math.PI*2); CX.fill();
-        CX.fillStyle='#333'; CX.fillRect(x+68,y+10,5,5); CX.fillRect(x+80,y+10,5,5);
-        CX.fillStyle=PANTS;
-        rr(x+46,y+40,16,20,4); CX.fill(); rr(x+66,y+40,16,20,4); CX.fill();
-        CX.fillStyle=SHOE; CX.fillRect(x+42,y+58,24,8); CX.fillRect(x+62,y+58,24,8);
+        // === GEDOKEN ===
+        // Haar (naar voren geslingerd)
+        CX.fillStyle=HAIR2;
+        CX.beginPath();
+        CX.moveTo(x+74,y+6); CX.bezierCurveTo(x+102,y+10,x+106,y+30,x+100,y+44);
+        CX.lineTo(x+88,y+40); CX.bezierCurveTo(x+92,y+28,x+88,y+14,x+68,y+10);
+        CX.closePath(); CX.fill();
+        // Zwaard (horizontaal, slashend)
+        CX.fillStyle=SILVER; CX.fillRect(x+78,y+18,28,5);
+        CX.fillStyle=GOLD;   CX.fillRect(x+74,y+14,5,13);
+        CX.fillStyle=BELT;   CX.fillRect(x+68,y+17,6,7);
+        // Harnas
+        CX.fillStyle=TUNIC; rr(x+34,y+14,42,28,6); CX.fill();
+        CX.fillStyle=CHAIN; CX.fillRect(x+34,y+19,42,3); CX.fillRect(x+34,y+29,42,3);
+        CX.fillStyle=BELT;  CX.fillRect(x+32,y+38,46,6);
+        CX.fillStyle=GOLD;  CX.fillRect(x+50,y+39,8,4);
+        // Hoofd
+        CX.fillStyle=SKIN; CX.beginPath(); CX.arc(x+74,y+16,18,0,Math.PI*2); CX.fill();
+        CX.fillStyle=HAIR; CX.beginPath(); CX.ellipse(x+74,y+3,18,11,-0.1,Math.PI,Math.PI*2); CX.fill();
+        // Puntig oor
+        CX.fillStyle=SKIN;
+        CX.beginPath(); CX.moveTo(x+57,y+12); CX.lineTo(x+50,y+16); CX.lineTo(x+57,y+23); CX.fill();
+        // Ogen
+        CX.fillStyle='#1a2840';
+        CX.beginPath(); CX.ellipse(x+66,y+17,3.5,2.5,-0.2,0,Math.PI*2); CX.fill();
+        CX.beginPath(); CX.ellipse(x+80,y+17,3.5,2.5, 0.2,0,Math.PI*2); CX.fill();
+        // Benen (gehurkt)
+        CX.fillStyle=LEGS;
+        rr(x+34,y+42,15,22,4); CX.fill(); rr(x+53,y+42,15,22,4); CX.fill();
+        // Laarzen
+        CX.fillStyle=BOOTS;
+        CX.fillRect(x+30,y+60,22,8); CX.fillRect(x+49,y+60,22,8);
       }
       CX.restore();
     }
@@ -2050,7 +2102,7 @@
         CX.save(); CX.textAlign='center'; CX.textBaseline='middle';
         CX.fillStyle='rgba(255,255,255,0.92)';
         CX.font=`bold ${Math.max(26,W*0.042)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.fillText(gs===S.DEAD?'GAME OVER':'GEEN INTERNET', W/2, H*0.43);
+        CX.fillText(gs===S.DEAD?'GAME OVER':'MINI GAME', W/2, H*0.43);
         CX.fillStyle='rgba(255,255,255,0.55)';
         CX.font=`${Math.max(14,W*0.021)}px 'Barlow Condensed',sans-serif`;
         CX.fillText('Tik of druk SPATIE om te spelen', W/2, H*0.52); CX.restore();
