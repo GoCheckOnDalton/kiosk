@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>ICT Desk · Dalton Den Haag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -110,8 +112,7 @@
       align-self: end;
       display: flex; flex-direction: column;
       padding: 0.8rem 1.2rem 1.2rem;
-      background: var(--glass);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      background: rgba(0,0,0,0.48);
       border: 1px solid var(--border);
       border-radius: 16px 16px 0 0;
       height: clamp(200px, 40vh, 380px);
@@ -195,8 +196,7 @@
     #sl-track {
       position: relative;
       width: 100%; height: min(380px, 36vh);
-      background: rgba(0,0,0,0.28);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      background: rgba(0,0,0,0.42);
       border-radius: 26px;
       border: 2px solid rgba(255,255,255,0.16);
       /* no overflow:hidden — needed for glow to bleed out */
@@ -256,8 +256,7 @@
       align-self: end;
       display: flex; flex-direction: column;
       padding: 0.8rem 1.2rem 1.2rem;
-      background: var(--glass);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      background: rgba(0,0,0,0.48);
       border: 1px solid var(--border);
       border-radius: 16px 16px 0 0;
       gap: 0.6rem;
@@ -451,16 +450,29 @@
     body.status-open #faq-btn      { display: none; }
     body.status-open #game-btn     { display: inline-flex; }
 
-    /* Gif als achtergrond in de slider track */
-    .slider-gif {
+    /* Decoratieve achtergrond in de slider track (vervangt externe GIFs) */
+    .slider-deco {
       position: absolute; top: 0; bottom: 0;
-      height: 100%; width: auto;
-      opacity: 0.22; pointer-events: none; z-index: 0; object-fit: cover;
+      width: 60%; height: 100%;
+      pointer-events: none; z-index: 0; border-radius: inherit;
     }
-    #slider-gif-closed { right: 0; left: auto; }
-    #slider-gif-open   { left: 0; right: auto; transform: scaleX(-1); display: none; }
-    body.status-open  #slider-gif-closed { display: none; }
-    body.status-open  #slider-gif-open   { display: block; }
+    #slider-deco-closed {
+      right: 0; left: auto;
+      background: radial-gradient(ellipse at 75% 50%, rgba(255,81,47,0.55), transparent 70%);
+      animation: deco-pulse 3.2s ease-in-out infinite alternate;
+    }
+    #slider-deco-open {
+      left: 0; right: auto;
+      background: radial-gradient(ellipse at 25% 50%, rgba(74,222,128,0.55), transparent 70%);
+      animation: deco-pulse 3.2s ease-in-out infinite alternate;
+      display: none;
+    }
+    @keyframes deco-pulse {
+      from { opacity: 0.14; transform: scale(0.94); }
+      to   { opacity: 0.28; transform: scale(1.06); }
+    }
+    body.status-open  #slider-deco-closed { display: none; }
+    body.status-open  #slider-deco-open   { display: block; }
 
 
     #right-title {
@@ -885,12 +897,8 @@
   <div id="slider-row">
     <div id="status-slider" aria-label="Status wisselen">
       <div id="sl-track">
-        <img id="slider-gif-closed" class="slider-gif"
-             src="https://media1.giphy.com/media/mBnJ5l4HZgQq0w1D2G/giphy.gif"
-             alt="" draggable="false">
-        <img id="slider-gif-open" class="slider-gif"
-             src="https://media3.giphy.com/media/ASd0Ukj0y3qMM/giphy.gif"
-             alt="" draggable="false">
+        <div id="slider-deco-closed" class="slider-deco"></div>
+        <div id="slider-deco-open"   class="slider-deco"></div>
         <div id="sl-knob"
              role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"
              tabindex="0" aria-label="Sleep om status te wisselen">
@@ -1098,7 +1106,7 @@
         checkUnread(); return;
       }
       c.innerHTML = messages.slice().reverse().map(m => `
-        <div class="msg-card ${m.read ? '' : 'unread'}">
+        <div class="msg-card ${m.read ? '' : 'unread'}" data-msgid="${esc(m.id)}">
           <div class="msg-meta">
             <strong>${esc(m.naam)}</strong><span>${esc(m.lnr)}</span><span>${esc(m.ts)}</span>
             <button class="msg-delete-btn" onclick="deleteFromRight('${esc(m.id)}')" aria-label="Verwijderen">×</button>
@@ -1112,11 +1120,24 @@
     function markOneRead(id) {
       const m = messages.find(m => m.id === id);
       if (!m) return;
-      m.read = true; save(KEY_M, messages); renderRightPanel();
+      m.read = true; save(KEY_M, messages);
+      const card = document.querySelector(`.msg-card[data-msgid="${id}"]`);
+      if (card) {
+        card.classList.remove('unread');
+        const btn = card.querySelector('.msg-gelezen-btn');
+        if (btn) btn.remove();
+      }
+      checkUnread();
     }
     function deleteFromRight(id) {
       messages = messages.filter(m => m.id !== id);
-      save(KEY_M, messages); renderRightPanel(); toast('🗑️ VERWIJDERD');
+      save(KEY_M, messages);
+      const card = document.querySelector(`.msg-card[data-msgid="${id}"]`);
+      if (card) card.remove();
+      const c = document.getElementById('right-msgs');
+      if (!c.children.length) c.innerHTML = '<div class="right-empty">Geen berichten</div>';
+      checkUnread();
+      toast('🗑️ VERWIJDERD');
     }
 
     // Enter in textarea submits; Shift+Enter still inserts newline
@@ -1419,8 +1440,18 @@
 
     // ── Mini Piano ───────────────────────────────────────────
     let audioCtx = null;
+    const _noiseBufs = {};
     function getAudioCtx() {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        [0.10, 0.25].forEach(dur => {
+          const n = Math.floor(audioCtx.sampleRate * dur);
+          const buf = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+          _noiseBufs[dur] = buf;
+        });
+      }
       return audioCtx;
     }
 
@@ -1516,14 +1547,6 @@
     buildPiano();
 
     // ── Drum sounds ──────────────────────────────────────────
-    function makeNoiseBuf(ctx, dur) {
-      const n = Math.floor(ctx.sampleRate * dur);
-      const buf = ctx.createBuffer(1, n, ctx.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-      return buf;
-    }
-
     const BEAT = {
       kick: ctx => {
         const now = ctx.currentTime;
@@ -1535,7 +1558,7 @@
       },
       snare: ctx => {
         const now = ctx.currentTime;
-        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.25);
+        const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.25];
         const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=2200; nf.Q.value=0.9;
         const ng = ctx.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
         ng.gain.setValueAtTime(1.3, now); ng.gain.exponentialRampToValueAtTime(0.001, now+0.22);
@@ -1546,7 +1569,7 @@
       },
       hihat: ctx => {
         const now = ctx.currentTime;
-        const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.10);
+        const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.10];
         const f = ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
         const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
         g.gain.setValueAtTime(0.90, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.09);
@@ -1555,7 +1578,7 @@
       clap: ctx => {
         const now = ctx.currentTime;
         [0, 0.012, 0.024].forEach(off => {
-          const ns = ctx.createBufferSource(); ns.buffer = makeNoiseBuf(ctx, 0.1);
+          const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.10];
           const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1100; f.Q.value=0.9;
           const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
           g.gain.setValueAtTime(1.05, now+off); g.gain.exponentialRampToValueAtTime(0.001, now+off+0.11);
@@ -1582,7 +1605,7 @@
     ];
     const SEQ_STEPS = 16;
     let seqPat = SEQ_TRACKS.map(() => Array(SEQ_STEPS).fill(false));
-    let seqRunning = false, seqCurStep = 0, seqBpm = 120, seqTimer = null;
+    let seqRunning = false, seqCurStep = 0, seqBpm = 120, seqTimer = null, seqNextTime = 0;
 
     function seqBuild() {
       const grid = document.getElementById('seq-grid');
@@ -1619,11 +1642,13 @@
       });
       seqUpdateHead(seqCurStep);
       seqCurStep = (seqCurStep + 1) % SEQ_STEPS;
-      seqTimer = setTimeout(seqTick, (60 / seqBpm / 4) * 1000);
+      seqNextTime += (60 / seqBpm / 4) * 1000;
+      seqTimer = setTimeout(seqTick, Math.max(0, seqNextTime - performance.now()));
     }
 
     function seqStart() {
       seqRunning = true; seqCurStep = 0;
+      seqNextTime = performance.now();
       const btn = document.getElementById('seq-play');
       btn.textContent = '■ STOP'; btn.classList.add('playing');
       seqTick();
@@ -1668,7 +1693,7 @@
 
     seqBuild();
 
-    // ── Screen wake lock + webcam bewegingsdetectie ───────────
+    // ── Screen wake lock ─────────────────────────────────────
     let wakeLock = null;
 
     async function requestWakeLock() {
@@ -1686,41 +1711,6 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') requestWakeLock();
     });
-
-    async function startMotionDetection() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 160, height: 90, facingMode: 'user' }
-        });
-        const video = document.createElement('video');
-        video.srcObject = stream; video.muted = true; video.playsInline = true;
-        await video.play();
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 80; canvas.height = 45;
-        const ctx2 = canvas.getContext('2d', { willReadFrequently: true });
-        let prev = null, cooldown = 0;
-
-        setInterval(() => {
-          ctx2.drawImage(video, 0, 0, 80, 45);
-          const frame = ctx2.getImageData(0, 0, 80, 45).data;
-          if (prev) {
-            let diff = 0;
-            for (let i = 0; i < frame.length; i += 4) diff += Math.abs(frame[i] - prev[i]);
-            if (diff / (80 * 45) > 8 && Date.now() > cooldown) {
-              cooldown = Date.now() + 4000;
-              if (!wakeLock) requestWakeLock();
-            }
-          }
-          prev = new Uint8ClampedArray(frame);
-        }, 400);
-
-      } catch (_) {
-        // Geen cameratoestemming — val terug op pointer events
-        document.addEventListener('pointermove', () => { if (!wakeLock) requestWakeLock(); }, { passive: true });
-      }
-    }
-    startMotionDetection();
 
   </script>
 
