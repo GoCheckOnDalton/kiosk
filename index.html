@@ -934,8 +934,8 @@
       <div id="seq-grid"></div>
     </div>
     <div id="piano-area">
-      <div id="synth-brand">JX-800 · SYNTHESIZER</div>
-      <div id="piano-label">Speel een melody op de beat.</div>
+      <div id="synth-brand">BASS · PLUCK</div>
+      <div id="piano-label">Speel een bassline op de beat.</div>
       <div id="mini-piano" role="group" aria-label="Mini piano"></div>
     </div>
   </div>
@@ -1455,7 +1455,7 @@
       return audioCtx;
     }
 
-    // 80s synth: 3 detuned saws + sub + filter sweep (Stranger Things vibes)
+    // Bass pluck: triangle + sub sine, punchy attack — voor basslines op beats
     function noteOn(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
@@ -1463,25 +1463,24 @@
       const env = ctx.createGain();
       env.connect(ctx.destination);
       env.gain.setValueAtTime(0.001, now);
-      env.gain.linearRampToValueAtTime(0.15, now + 0.06);
+      env.gain.linearRampToValueAtTime(0.34, now + 0.010); // punchy aanslag
+      env.gain.exponentialRampToValueAtTime(0.24, now + 0.10); // snel decay naar sustain
 
       const filt = ctx.createBiquadFilter();
-      filt.type = 'lowpass'; filt.Q.value = 2.2;
-      filt.frequency.setValueAtTime(400, now);
-      filt.frequency.linearRampToValueAtTime(3800, now + 0.14);
+      filt.type = 'lowpass'; filt.Q.value = 1.4;
+      filt.frequency.setValueAtTime(600, now);
+      filt.frequency.exponentialRampToValueAtTime(1400, now + 0.04); // filter opent kort
       filt.connect(env);
 
       const oscs = [];
-      [-7, 0, 7].forEach((det, i) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sawtooth'; o.frequency.value = freq; o.detune.value = det;
-        o.connect(g); g.connect(filt);
-        g.gain.value = i === 1 ? 0.38 : 0.20;
-        o.start(now); oscs.push(o);
-      });
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = freq;
+      o.connect(g); g.connect(filt); g.gain.value = 0.80;
+      o.start(now); oscs.push(o);
+
       const sub = ctx.createOscillator(), subG = ctx.createGain();
       sub.type = 'sine'; sub.frequency.value = freq / 2;
-      sub.connect(subG); subG.connect(env); subG.gain.value = 0.22;
+      sub.connect(subG); subG.connect(env); subG.gain.value = 0.55;
       sub.start(now); oscs.push(sub);
 
       return { oscs, env };
@@ -1489,7 +1488,7 @@
 
     function noteOff(note) {
       if (!note) return;
-      const ctx = getAudioCtx(), now = ctx.currentTime, rel = 0.38;
+      const ctx = getAudioCtx(), now = ctx.currentTime, rel = 0.14;
       note.env.gain.setValueAtTime(note.env.gain.value, now);
       note.env.gain.exponentialRampToValueAtTime(0.001, now + rel);
       note.oscs.forEach(o => { try { o.stop(now + rel + 0.05); } catch(e){} });
@@ -1553,7 +1552,7 @@
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type = 'sine';
         o.frequency.setValueAtTime(160, now); o.frequency.exponentialRampToValueAtTime(35, now+0.45);
-        g.gain.setValueAtTime(1.8, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
+        g.gain.setValueAtTime(2.25, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.5);
         o.start(now); o.stop(now+0.5);
       },
       snare: ctx => {
@@ -1561,10 +1560,10 @@
         const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.25];
         const nf = ctx.createBiquadFilter(); nf.type='bandpass'; nf.frequency.value=2200; nf.Q.value=0.9;
         const ng = ctx.createGain(); ns.connect(nf); nf.connect(ng); ng.connect(ctx.destination);
-        ng.gain.setValueAtTime(1.3, now); ng.gain.exponentialRampToValueAtTime(0.001, now+0.22);
+        ng.gain.setValueAtTime(1.625, now); ng.gain.exponentialRampToValueAtTime(0.001, now+0.22);
         const o = ctx.createOscillator(), og = ctx.createGain();
         o.type='triangle'; o.frequency.value=190; o.connect(og); og.connect(ctx.destination);
-        og.gain.setValueAtTime(0.65, now); og.gain.exponentialRampToValueAtTime(0.001, now+0.12);
+        og.gain.setValueAtTime(0.81, now); og.gain.exponentialRampToValueAtTime(0.001, now+0.12);
         ns.start(now); ns.stop(now+0.25); o.start(now); o.stop(now+0.12);
       },
       hihat: ctx => {
@@ -1572,7 +1571,7 @@
         const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.10];
         const f = ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=7500;
         const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.90, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.09);
+        g.gain.setValueAtTime(1.125, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.09);
         ns.start(now); ns.stop(now+0.10);
       },
       clap: ctx => {
@@ -1581,7 +1580,7 @@
           const ns = ctx.createBufferSource(); ns.buffer = _noiseBufs[0.10];
           const f = ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1100; f.Q.value=0.9;
           const g = ctx.createGain(); ns.connect(f); f.connect(g); g.connect(ctx.destination);
-          g.gain.setValueAtTime(1.05, now+off); g.gain.exponentialRampToValueAtTime(0.001, now+off+0.11);
+          g.gain.setValueAtTime(1.31, now+off); g.gain.exponentialRampToValueAtTime(0.001, now+off+0.11);
           ns.start(now+off); ns.stop(now+off+0.11);
         });
       },
@@ -1590,7 +1589,7 @@
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination); o.type='sine';
         o.frequency.setValueAtTime(110, now); o.frequency.exponentialRampToValueAtTime(55, now+0.35);
-        g.gain.setValueAtTime(1.4, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
+        g.gain.setValueAtTime(1.75, now); g.gain.exponentialRampToValueAtTime(0.001, now+0.4);
         o.start(now); o.stop(now+0.4);
       },
     };
