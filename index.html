@@ -338,7 +338,7 @@
 
     /* ── Piano — Roland 80s synth style ── */
     #piano-area {
-      width: 500px; flex-shrink: 0;
+      width: 660px; flex-shrink: 0;
       display: flex; flex-direction: column;
       align-items: stretch; justify-content: flex-end;
       gap: 0.28rem; padding: 10px 12px 14px;
@@ -1463,8 +1463,8 @@
       const env = ctx.createGain();
       env.connect(ctx.destination);
       env.gain.setValueAtTime(0.001, now);
-      env.gain.linearRampToValueAtTime(0.34, now + 0.010); // punchy aanslag
-      env.gain.exponentialRampToValueAtTime(0.24, now + 0.10); // snel decay naar sustain
+      env.gain.linearRampToValueAtTime(0.85, now + 0.010); // punchy aanslag
+      env.gain.exponentialRampToValueAtTime(0.60, now + 0.10); // snel decay naar sustain
 
       const filt = ctx.createBiquadFilter();
       filt.type = 'lowpass'; filt.Q.value = 1.4;
@@ -1475,12 +1475,12 @@
       const oscs = [];
       const o = ctx.createOscillator(), g = ctx.createGain();
       o.type = 'triangle'; o.frequency.value = freq;
-      o.connect(g); g.connect(filt); g.gain.value = 0.80;
+      o.connect(g); g.connect(filt); g.gain.value = 2.0;
       o.start(now); oscs.push(o);
 
       const sub = ctx.createOscillator(), subG = ctx.createGain();
       sub.type = 'sine'; sub.frequency.value = freq / 2;
-      sub.connect(subG); subG.connect(env); subG.gain.value = 0.55;
+      sub.connect(subG); subG.connect(env); subG.gain.value = 1.375;
       sub.start(now); oscs.push(sub);
 
       return { oscs, env };
