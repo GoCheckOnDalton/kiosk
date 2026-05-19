@@ -198,16 +198,16 @@
     #open-screen {
       display: none;
       flex: 1; min-height: 0;
-      flex-direction: row;
+      flex-direction: column;
       align-items: stretch;
-      gap: 0.8rem;
+      gap: 0.6rem;
       position: relative; z-index: 1;
       padding: 0.4rem 1.2rem 0.5rem;
     }
 
     /* ── Step Sequencer ── */
     #seq-area {
-      display: flex; flex-direction: column; gap: 0.32rem; flex: 1; min-width: 0;
+      display: flex; flex-direction: column; gap: 0.32rem; flex: 1; min-height: 0;
       background: rgba(0,0,0,0.32); border-radius: 10px; padding: 0.55rem 0.65rem;
     }
     #seq-transport { display: flex; flex-direction: row; align-items: center; gap: 0.65rem; }
@@ -267,7 +267,7 @@
 
     /* ── Piano — Roland 80s synth style ── */
     #piano-area {
-      width: 660px; flex-shrink: 0;
+      width: 100%; flex-shrink: 0;
       display: flex; flex-direction: column;
       align-items: stretch; justify-content: flex-end;
       gap: 0.28rem; padding: 10px 12px 14px;
@@ -728,73 +728,41 @@
     #status-tab {
       position: fixed; top: 0; right: 2rem; z-index: 30;
       display: flex; flex-direction: column; align-items: center;
-      padding: 0.45rem 1.1rem 0.65rem;
-      background: rgba(255,255,255,0.13);
-      border: 1.5px solid rgba(255,255,255,0.24);
+      padding: 0.9rem 2rem 1.1rem;
+      min-width: 90px;
+      background: rgba(255,255,255,0.16);
+      border: 2px solid rgba(255,255,255,0.30);
       border-top: none;
-      border-radius: 0 0 14px 14px;
-      color: rgba(255,255,255,0.75);
+      border-radius: 0 0 20px 20px;
+      color: rgba(255,255,255,0.85);
       cursor: pointer;
-      gap: 0.15rem;
+      gap: 0.25rem;
       transition: background 0.15s, color 0.15s;
       user-select: none;
     }
-    #status-tab:hover  { background: rgba(255,255,255,0.22); color: #fff; }
-    #status-tab:active { background: rgba(255,255,255,0.30); }
-    #status-tab-icon  { font-size: 1.3rem; line-height: 1; }
-    #status-tab-label { font-size: 0.58rem; letter-spacing: 0.22em; }
-    /* ── Doorbell ── */
+    #status-tab:hover  { background: rgba(255,255,255,0.26); color: #fff; }
+    #status-tab:active { background: rgba(255,255,255,0.36); }
+    #status-tab-icon  { font-size: 1.9rem; line-height: 1; }
+    #status-tab-label { font-size: 0.72rem; letter-spacing: 0.20em; }
+    /* ── Doorbell (alleen op OPEN scherm) ── */
+    #doorbell-row {
+      flex-shrink: 0; display: flex; justify-content: center;
+      padding: 0.3rem 0 0.4rem;
+    }
     #doorbell-btn {
-      margin-top: auto; padding: 0.7rem 1rem;
-      min-height: 54px; width: 100%;
-      background: linear-gradient(to right, #f7971e, #ffd200);
-      border: none; border-radius: 12px;
-      color: #1a1000; font-family: var(--font);
-      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.14em;
-      cursor: pointer; display: flex; align-items: center;
-      justify-content: center; gap: 0.5rem;
-      box-shadow: 0 4px 18px rgba(255,180,0,0.35);
-      transition: filter 0.12s, transform 0.1s;
-      flex-shrink: 0;
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.85rem 2.4rem;
+      min-height: 60px;
+      background: #4dbb45;
+      border: none; border-radius: 50px;
+      color: #fff; font-family: var(--font);
+      font-size: 1.15rem; font-weight: 700; letter-spacing: 0.14em;
+      cursor: pointer;
+      box-shadow: 0 4px 22px rgba(77,187,69,0.50);
+      transition: filter 0.12s, transform 0.10s;
     }
     #doorbell-btn:hover  { filter: brightness(1.12); }
-    #doorbell-btn:active { transform: scale(0.95); }
-    #doorbell-icon { font-size: 1.5rem; }
-    /* ── Game tile ── */
-    #game-tile {
-      position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 25;
-      width: 120px;
-      cursor: pointer; border-radius: 10px; overflow: hidden;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.55);
-      border: 2px solid rgba(255,255,255,0.18);
-      transition: transform 0.14s, box-shadow 0.14s;
-    }
-    #game-tile:hover  { transform: scale(1.06); box-shadow: 0 10px 32px rgba(0,0,0,0.70); }
-    #game-tile:active { transform: scale(0.97); }
-    #game-tile-img  { display: block; width: 100%; height: auto; }
-    #game-tile-label {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: rgba(0,0,0,0.72); color: #fff;
-      font-size: 0.72rem; letter-spacing: 0.14em;
-      text-align: center; padding: 0.3rem 0;
-    }
-    /* ── Game overlay ── */
-    #game-overlay {
-      position: fixed; inset: 0; z-index: 210;
-      background: #000;
-      display: flex; flex-direction: column;
-    }
-    #game-overlay[hidden] { display: none; }
-    #game-close {
-      position: absolute; top: 1rem; right: 1rem; z-index: 211;
-      width: 52px; height: 52px; border-radius: 50%;
-      background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.35);
-      color: #fff; font-size: 1.4rem; cursor: pointer;
-      display: grid; place-items: center;
-      transition: background 0.12s;
-    }
-    #game-close:hover { background: rgba(255,255,255,0.28); }
-    #game-frame { width: 100%; flex: 1; border: none; }
+    #doorbell-btn:active { transform: scale(0.94); }
   </style>
 </head>
 <body class="status-closed">
@@ -835,6 +803,14 @@
       <div id="piano-label">Speel een melodie op de beat.</div>
       <div id="mini-piano" role="group" aria-label="Mini piano"></div>
     </div>
+    <div id="doorbell-row">
+      <button id="doorbell-btn" onclick="playDoorbell()" type="button">
+        <svg viewBox="0 0 24 24" fill="white" width="28" height="28" aria-hidden="true">
+          <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z"/>
+        </svg>
+        BEL AAN
+      </button>
+    </div>
   </div>
 
   <!-- 2-column grid (GESLOTEN only) -->
@@ -850,10 +826,6 @@
           <textarea id="f-bericht" placeholder="Jouw bericht..."           required maxlength="600"></textarea>
           <button id="f-submit" type="submit">VERSTUUR →</button>
         </form>
-        <button id="doorbell-btn" onclick="playLotrDoorbell()" type="button">
-          <span id="doorbell-icon">🔔</span>
-          <span id="doorbell-label">BEL AAN</span>
-        </button>
       </div>
       <div id="open-welcome">
         <div id="open-welcome-text">KOM GERUST<br>BINNEN</div>
@@ -1590,57 +1562,33 @@
       if (document.visibilityState === 'visible') requestWakeLock();
     });
 
-    // ── LOTR 8-bit deurbel ───────────────────────────────────
-    function playLotrDoorbell() {
+    // ── Deurbel — melodisch belgeluid (~2.5 sec) ────────────
+    function playDoorbell() {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
+      // C-majeur pentatonisch, sine + sub, belachtig decay
       const notes = [
-        [293.66,0.18],[329.63,0.18],[349.23,0.18],[392.00,0.10],[440.00,0.10],
-        [466.16,0.22],[440.00,0.18],[392.00,0.18],[349.23,0.18],[329.63,0.18],
-        [293.66,0.36],[0,0.10],
-        [440.00,0.18],[466.16,0.18],[440.00,0.18],[392.00,0.42],
-        [0,0.10],[349.23,0.18],[392.00,0.18],[440.00,0.60],
+        [523.25,0.20],[659.25,0.20],[783.99,0.20],[1046.5,0.38],
+        [0,0.08],
+        [783.99,0.16],[659.25,0.16],[523.25,0.52],
       ];
       let t = now;
       notes.forEach(([freq, dur]) => {
         if (freq === 0) { t += dur; return; }
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'square'; o.frequency.value = freq;
-        o.connect(g); g.connect(ctx.destination);
-        g.gain.setValueAtTime(0.0, t);
-        g.gain.linearRampToValueAtTime(0.22, t + 0.008);
-        g.gain.setValueAtTime(0.22, t + dur - 0.025);
-        g.gain.linearRampToValueAtTime(0.0, t + dur);
-        o.start(t); o.stop(t + dur + 0.01);
+        [[freq, 0.30], [freq/2, 0.13]].forEach(([f, vol]) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          o.connect(g); g.connect(ctx.destination);
+          g.gain.setValueAtTime(vol, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + dur + 0.40);
+          o.start(t); o.stop(t + dur + 0.45);
+        });
         t += dur;
       });
     }
 
-    function openGame() {
-      document.getElementById('game-frame').src = 'https://vimm.net/vault/?p=play&mediaId=1645';
-      document.getElementById('game-overlay').hidden = false;
-    }
-    function closeGame() {
-      document.getElementById('game-frame').src = '';
-      document.getElementById('game-overlay').hidden = true;
-    }
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && !document.getElementById('game-overlay').hidden) closeGame();
-    });
-
   </script>
 
 
-  <div id="game-tile" onclick="openGame()">
-    <img id="game-tile-img" src="https://dl.vimm.net/image.php?type=box_large&id=1676" alt="Game" draggable="false">
-    <div id="game-tile-label">▶ SPEEL</div>
-  </div>
-
-  <div id="game-overlay" hidden>
-    <button id="game-close" onclick="closeGame()" aria-label="Sluiten">✕</button>
-    <iframe id="game-frame" src="" allowfullscreen allow="autoplay; gamepad"></iframe>
-  </div>
-
-  
 </body>
 </html>
