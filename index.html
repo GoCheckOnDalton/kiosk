@@ -9,12 +9,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
   <style>
     :root {
-      --open-a:  #ffe000;
-      --open-b:  #799f0c;
-      --clos-a:  #ff512f;
-      --clos-b:  #dd2476;
+      --open-a:  #00ff41;
+      --open-b:  #00aa2a;
+      --clos-a:  #ff0033;
+      --clos-b:  #aa0022;
       --glass:   rgba(0,0,0,0.22);
-      --border:  rgba(255,255,255,0.14);
+      --border:  rgba(0,255,65,0.18);
       --font:    'Barlow Condensed', 'Arial Narrow', sans-serif;
     }
 
@@ -83,8 +83,8 @@
     body.status-open #status-word {
       letter-spacing: 1.05em;
       margin-right: -1.05em;
-      color: #1e2d00;
-      text-shadow: 0 4px 24px rgba(255,255,255,0.18);
+      color: #fff;
+      text-shadow: 0 4px 24px rgba(0,255,65,0.35);
     }
 
     /* ── 2-column grid ── */
@@ -92,7 +92,7 @@
       position: relative; z-index: 1;
       flex: 1;
       display: grid;
-      grid-template-columns: 2fr 3fr;
+      grid-template-columns: 1fr 1fr;
       min-height: 0;
     }
 
@@ -114,7 +114,7 @@
     }
 
     #left-title {
-      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      font-size: clamp(2.2rem, 4.4vw, 3.2rem);
       letter-spacing: 0.14em; color: #fff; flex-shrink: 0;
     }
 
@@ -138,7 +138,7 @@
       background: rgba(255,255,255,0.14);
       border: 1.5px solid rgba(255,255,255,0.26);
       border-radius: 12px; padding: 0.5rem 0.85rem;
-      color: #fff; font-size: 0.9rem; letter-spacing: 0.05em;
+      color: #fff; font-size: 1.8rem; letter-spacing: 0.05em;
       min-height: 38px;
       transition: border-color 0.2s, background 0.2s;
       user-select: text;
@@ -154,10 +154,10 @@
 
     #f-submit {
       padding: 0.6rem; min-height: 40px;
-      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
+      background-image: linear-gradient(to right, #ff0033 0%, #00ff41 51%, #ff0033 100%);
       background-size: 200% auto; background-position: left center;
       color: #fff;
-      font-size: 1rem; letter-spacing: 0.14em;
+      font-size: 2rem; letter-spacing: 0.14em;
       border: none; border-radius: 12px; cursor: pointer;
       box-shadow: 0 0 16px rgba(0,0,0,0.25);
       transition: background-position 0.5s, transform 0.12s;
@@ -212,14 +212,14 @@
     #seq-transport { display: flex; flex-direction: row; align-items: center; gap: 0.65rem; }
     #seq-play {
       padding: 0.36rem 1.1rem;
-      background-image: linear-gradient(to right, #1CD8D2 0%, #93EDC7 51%, #1CD8D2 100%);
+      background-image: linear-gradient(to right, #00aa2a 0%, #00ff41 51%, #00aa2a 100%);
       background-size: 200% auto; background-position: left center;
       border: none; border-radius: 8px; color: #fff;
       font-family: var(--font); font-size: 1rem; letter-spacing: 0.10em;
       cursor: pointer; transition: background-position 0.5s, transform 0.08s;
     }
     #seq-play:hover  { background-position: right center; }
-    #seq-play.playing { background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%); }
+    #seq-play.playing { background-image: linear-gradient(to right, #ff0033 0%, #ff4466 51%, #ff0033 100%); }
     #seq-play:active { transform: scale(0.93); }
     #seq-bpm-wrap {
       display: flex; align-items: center; gap: 0.32rem;
@@ -271,14 +271,14 @@
       align-items: stretch; justify-content: flex-end;
       gap: 0.28rem; padding: 10px 12px 14px;
       background: linear-gradient(155deg, #1e1b2e, #12101e);
-      border: 1.5px solid rgba(120,100,200,0.28);
+      border: 1.5px solid rgba(0,255,65,0.28);
       border-radius: 12px;
       box-shadow: 0 8px 40px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     #synth-brand {
       font-family: 'Courier New', monospace;
       font-size: 0.58rem; letter-spacing: 0.32em; text-transform: uppercase;
-      color: #ff4500; text-shadow: 0 0 10px rgba(255,70,0,0.85);
+      color: #00ff41; text-shadow: 0 0 10px rgba(0,255,65,0.85);
       flex-shrink: 0;
     }
     #piano-label {
@@ -301,19 +301,19 @@
     }
     .piano-white:first-child { border-left: 1px solid rgba(30,20,50,0.45); }
     .piano-white.active {
-      background: linear-gradient(to bottom, #00e8ff, #00a8c8);
-      box-shadow: 0 0 20px 6px rgba(0,232,255,0.80), inset 0 -4px 8px rgba(0,0,0,0.20);
+      background: linear-gradient(to bottom, #00ff41, #00aa2a);
+      box-shadow: 0 0 20px 6px rgba(0,255,65,0.80), inset 0 -4px 8px rgba(0,0,0,0.20);
     }
     .piano-black {
       position: absolute; top: 0; height: 62%;
       background: linear-gradient(to bottom, #090814 0%, #161228 55%, #0d0b1e 100%);
       border-radius: 0 0 4px 4px; z-index: 2; cursor: pointer;
       transform: translateX(-50%); transition: background 0.04s, box-shadow 0.04s;
-      box-shadow: 0 5px 14px rgba(0,0,0,0.90), inset 0 1px 0 rgba(120,100,200,0.10);
+      box-shadow: 0 5px 14px rgba(0,0,0,0.90), inset 0 1px 0 rgba(0,255,65,0.10);
     }
     .piano-black.active {
-      background: linear-gradient(to bottom, #1a50ff, #0828bb);
-      box-shadow: 0 0 18px 5px rgba(50,100,255,0.88), inset 0 1px 0 rgba(255,255,255,0.08);
+      background: linear-gradient(to bottom, #ff0033, #aa0011);
+      box-shadow: 0 0 18px 5px rgba(255,0,51,0.88), inset 0 1px 0 rgba(255,255,255,0.08);
     }
     /* ── Slider PIN overlay ── */
     #spo {
@@ -334,7 +334,7 @@
       font-size: clamp(2.2rem, 5.5vw, 4rem);
       letter-spacing: 0.12em; color: #fff;
       background: rgba(255,255,255,0.06);
-      border: 2px solid rgba(170,60,255,0.45);
+      border: 2px solid rgba(255,0,51,0.55);
       border-radius: 16px; padding: 0.8rem 3rem;
       min-width: 320px; text-align: center;
     }
@@ -351,33 +351,33 @@
       display: grid; grid-template-columns: repeat(3, 1fr);
       gap: 1rem; width: min(520px, 90vw);
       padding: 1.6rem; border-radius: 24px;
-      border: 2px solid rgba(160,60,255,0.55);
-      box-shadow: 0 0 24px 8px rgba(150,50,255,0.35), 0 0 60px 20px rgba(120,30,210,0.18);
+      border: 2px solid rgba(0,255,65,0.55);
+      box-shadow: 0 0 24px 8px rgba(0,255,65,0.28), 0 0 60px 20px rgba(0,200,50,0.14);
       animation: pin-glow 2.2s ease-in-out infinite;
     }
     @keyframes pin-glow {
-      0%,100% { box-shadow: 0 0 24px 8px rgba(150,50,255,0.35), 0 0 60px 20px rgba(120,30,210,0.18); }
-      50%     { box-shadow: 0 0 38px 14px rgba(180,70,255,0.55), 0 0 90px 35px rgba(140,50,230,0.28); }
+      0%,100% { box-shadow: 0 0 24px 8px rgba(0,255,65,0.28), 0 0 60px 20px rgba(0,200,50,0.14); }
+      50%     { box-shadow: 0 0 38px 14px rgba(0,255,65,0.48), 0 0 90px 35px rgba(0,200,50,0.26); }
     }
     .spo-key {
       height: clamp(82px, 13vh, 110px);
       border-radius: 18px;
       font-size: clamp(2.2rem, 5vw, 3.5rem);
       font-family: 'Barlow Condensed', var(--font); font-weight: 600;
-      background: rgba(255,255,255,0.09);
-      border: 1.5px solid rgba(160,60,255,0.35);
-      color: #fff; cursor: pointer;
+      background: rgba(0,10,4,0.72);
+      border: 1.5px solid rgba(0,255,65,0.35);
+      color: #00ff41; cursor: pointer;
       transition: background 0.12s, transform 0.08s, box-shadow 0.1s;
     }
-    .spo-key:hover  { background: rgba(160,60,255,0.18); box-shadow: 0 0 12px 3px rgba(160,60,255,0.35); }
-    .spo-key:active { transform: scale(0.88); background: rgba(160,60,255,0.28); }
+    .spo-key:hover  { background: rgba(0,255,65,0.16); box-shadow: 0 0 12px 3px rgba(0,255,65,0.45); color: #fff; }
+    .spo-key:active { transform: scale(0.88); background: rgba(0,255,65,0.28); }
     .spo-cancel { color: rgba(248,113,113,0.90); border-color: rgba(248,113,113,0.35); font-size: clamp(1.4rem,3.2vw,2.2rem); }
     .spo-del    { font-size: clamp(1.4rem,3.2vw,2.2rem); }
     body.status-open #open-screen  { display: flex; }
     body.status-open #layout       { display: none; }
 
     #right-title {
-      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      font-size: clamp(2.2rem, 4.4vw, 3.2rem);
       letter-spacing: 0.14em; color: #fff;
       flex-shrink: 0;
     }
@@ -463,7 +463,7 @@
 
     .msg-meta {
       display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-      font-size: 0.80rem; letter-spacing: 0.05em;
+      font-size: 1.60rem; letter-spacing: 0.05em;
       color: rgba(255,255,255,0.44); margin-bottom: 0.35rem;
     }
     .msg-meta strong { color: rgba(255,255,255,0.90); }
@@ -480,7 +480,7 @@
     .msg-delete-btn:active { background: rgba(248,113,113,0.35); transform: scale(0.88); }
 
     .msg-body {
-      font-size: 0.88rem; letter-spacing: 0.03em;
+      font-size: 1.76rem; letter-spacing: 0.03em;
       color: rgba(255,255,255,0.82); line-height: 1.5;
       white-space: pre-wrap; word-break: break-word; margin-bottom: 0.5rem;
     }
@@ -488,14 +488,14 @@
       padding: 0.35rem 0.9rem; min-height: 38px;
       background: rgba(251,191,36,0.18);
       border: 1.5px solid rgba(251,191,36,0.55);
-      border-radius: 8px; color: #fde68a; font-size: 0.75rem;
+      border-radius: 8px; color: #fde68a; font-size: 1.50rem;
       letter-spacing: 0.12em; cursor: pointer;
       transition: background 0.12s, transform 0.1s;
     }
     .msg-gelezen-btn:active { background: rgba(251,191,36,0.35); transform: scale(0.93); }
 
     .right-empty {
-      color: rgba(255,255,255,0.28); font-size: 0.9rem;
+      color: rgba(255,255,255,0.28); font-size: 1.8rem;
       letter-spacing: 0.1em; text-align: center; padding: 2rem 0;
     }
 
@@ -729,18 +729,19 @@
       display: flex; flex-direction: column; align-items: center;
       padding: 0.9rem 2rem 1.1rem;
       min-width: 90px;
-      background: rgba(255,255,255,0.16);
-      border: 2px solid rgba(255,255,255,0.30);
+      background: rgba(0,10,4,0.78);
+      border: 2px solid rgba(0,255,65,0.45);
       border-top: none;
       border-radius: 0 0 20px 20px;
-      color: rgba(255,255,255,0.85);
+      color: #00ff41;
       cursor: pointer;
       gap: 0.25rem;
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, color 0.15s, box-shadow 0.15s;
       user-select: none;
+      box-shadow: 0 4px 18px rgba(0,255,65,0.22);
     }
-    #status-tab:hover  { background: rgba(255,255,255,0.26); color: #fff; }
-    #status-tab:active { background: rgba(255,255,255,0.36); }
+    #status-tab:hover  { background: rgba(0,255,65,0.14); color: #fff; box-shadow: 0 4px 24px rgba(0,255,65,0.45); }
+    #status-tab:active { background: rgba(0,255,65,0.24); }
     #status-tab-icon  { font-size: 1.9rem; line-height: 1; }
     #status-tab-label { font-size: 0.72rem; letter-spacing: 0.20em; }
     /* ── Doorbell (alleen op OPEN scherm) ── */
@@ -752,26 +753,46 @@
       display: flex; align-items: center; gap: 0.75rem;
       padding: 0.85rem 2.4rem;
       min-height: 60px;
-      background: #4dbb45;
-      border: none; border-radius: 50px;
+      background: linear-gradient(135deg, #00cc33, #009922);
+      border: 2px solid rgba(0,255,65,0.55);
+      border-radius: 50px;
       color: #fff; font-family: var(--font);
       font-size: 1.15rem; font-weight: 700; letter-spacing: 0.14em;
       cursor: pointer;
-      box-shadow: 0 4px 22px rgba(77,187,69,0.50);
-      transition: filter 0.12s, transform 0.10s;
+      box-shadow: 0 4px 22px rgba(0,204,51,0.55), 0 0 40px rgba(0,255,65,0.18);
+      transition: filter 0.12s, transform 0.10s, box-shadow 0.12s;
     }
-    #doorbell-btn:hover  { filter: brightness(1.12); }
+    #doorbell-btn:hover  { filter: brightness(1.18); box-shadow: 0 4px 30px rgba(0,255,65,0.75); }
     #doorbell-btn:active { transform: scale(0.94); }
+
+    /* ── Cyberpunk geometric grid overlay ── */
+    #geo-overlay {
+      position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.055) 1px, transparent 1px),
+        linear-gradient(rgba(255,0,51,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,51,0.025) 1px, transparent 1px);
+      background-size: 55px 55px, 55px 55px, 275px 275px, 275px 275px;
+    }
+
+    /* ── Swirl canvas ── */
+    #swirl-canvas {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      z-index: 1; pointer-events: none; opacity: 0.30;
+    }
   </style>
 </head>
 <body class="status-closed">
 
   <div id="bg"></div>
+  <canvas id="swirl-canvas"></canvas>
+  <div id="geo-overlay"></div>
 
   <!-- Status tab — top-right lipje -->
   <div id="status-tab" onclick="openSliderPin(currentStatus === 'closed' ? 'open' : 'closed')" title="Status wisselen">
     <span id="status-tab-icon">⚙</span>
-    <span id="status-tab-label">STATUS</span>
+    <span id="status-tab-label">SWITCH</span>
   </div>
 
   <!-- school label — invisible, triple-tap → admin -->
@@ -1346,6 +1367,7 @@
     }
 
     const PIANO_NOTES = [
+      // C4
       { freq:261.63,black:false },{ freq:277.18,black:true, pos:1 },
       { freq:293.66,black:false },{ freq:311.13,black:true, pos:2 },
       { freq:329.63,black:false },
@@ -1353,13 +1375,22 @@
       { freq:392.00,black:false },{ freq:415.30,black:true, pos:5 },
       { freq:440.00,black:false },{ freq:466.16,black:true, pos:6 },
       { freq:493.88,black:false },
-      { freq:523.25,black:false },
+      // C5
+      { freq:523.25,black:false },{ freq:554.37,black:true, pos:8 },
+      { freq:587.33,black:false },{ freq:622.25,black:true, pos:9 },
+      { freq:659.25,black:false },
+      { freq:698.46,black:false },{ freq:739.99,black:true, pos:11 },
+      { freq:783.99,black:false },{ freq:830.61,black:true, pos:12 },
+      { freq:880.00,black:false },{ freq:932.33,black:true, pos:13 },
+      { freq:987.77,black:false },
+      // C6
+      { freq:1046.50,black:false },
     ];
 
     function buildPiano() {
       const container = document.getElementById('mini-piano');
       const whites = PIANO_NOTES.filter(n => !n.black);
-      const nW = whites.length; // 8 witte toetsen (C4–C5)
+      const nW = whites.length; // 15 witte toetsen (C4–C6)
 
       whites.forEach(note => {
         const k = document.createElement('div');
@@ -1585,6 +1616,58 @@
         t += dur;
       });
     }
+
+    // ── White swirl screensaver animation ───────────────────
+    (function() {
+      const cvs = document.getElementById('swirl-canvas');
+      const cx  = cvs.getContext('2d');
+      let W, H, t = 0;
+
+      function resize() {
+        W = cvs.width  = window.innerWidth;
+        H = cvs.height = window.innerHeight;
+        cx.fillStyle = 'rgba(0,0,0,1)';
+        cx.fillRect(0, 0, W, H);
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function draw() {
+        cx.fillStyle = 'rgba(0,0,0,0.018)';
+        cx.fillRect(0, 0, W, H);
+
+        const ox = W * 0.5, oy = H * 0.5;
+        const rx = W * 0.40, ry = H * 0.36;
+        const steps = 420;
+
+        cx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const a = (i / steps) * Math.PI * 2;
+          const x = ox + rx * Math.sin(3 * a + t);
+          const y = oy + ry * Math.sin(2 * a + t * 0.7);
+          i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        }
+        cx.strokeStyle = 'rgba(255,255,255,0.55)';
+        cx.lineWidth = 1.2;
+        cx.stroke();
+
+        cx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const a = (i / steps) * Math.PI * 2;
+          const x = ox + rx * 0.62 * Math.sin(5 * a - t * 1.3);
+          const y = oy + ry * 0.62 * Math.sin(4 * a + t * 0.5);
+          i === 0 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        }
+        cx.strokeStyle = 'rgba(255,255,255,0.28)';
+        cx.lineWidth = 0.8;
+        cx.stroke();
+
+        t += 0.0055;
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    })();
 
   </script>
 
