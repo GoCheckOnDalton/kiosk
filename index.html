@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
@@ -88,22 +88,12 @@
       text-shadow: 0 4px 24px rgba(255,255,255,0.18);
     }
 
-    /* ── Slider row — slider only ── */
-    #slider-row {
-      position: relative; z-index: 2;
-      flex-shrink: 0;
-      display: flex; flex-direction: column;
-      align-items: stretch;
-      padding: 0.4rem 2rem 0rem;
-      gap: 0.5rem;
-    }
-
     /* ── 2-column grid ── */
     #layout {
       position: relative; z-index: 1;
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 2fr 3fr;
       min-height: 0;
     }
 
@@ -114,8 +104,8 @@
       padding: 0.8rem 1.2rem 1.2rem;
       background: rgba(0,0,0,0.48);
       border: 1px solid var(--border);
-      border-radius: 16px 16px 0 0;
-      height: clamp(200px, 40vh, 380px);
+      border-radius: 16px;
+      height: 100%;
       overflow: hidden;
     }
 
@@ -190,67 +180,6 @@
     }
     @keyframes spark-rotate { to { --spark-angle: 360deg; } }
 
-    /* ── CHUNKY SLIDER ── */
-    #status-slider { flex: 1; min-width: 0; }
-
-    #sl-track {
-      position: relative;
-      width: 100%; height: min(380px, 36vh);
-      background: rgba(0,0,0,0.42);
-      border-radius: 26px;
-      border: 2px solid rgba(255,255,255,0.16);
-      /* no overflow:hidden — needed for glow to bleed out */
-    }
-
-    /* Knob: chunky rectangle */
-    #sl-knob {
-      position: absolute;
-      top: 8px; left: 8px;
-      width: calc(65% - 8px);
-      height: calc(100% - 16px);
-      background: rgba(255,255,255,0.95);
-      border-radius: 19px;
-      cursor: grab; touch-action: none;
-      isolation: isolate;              /* stacking context for sparks */
-      display: flex; align-items: center; justify-content: center;
-      transition: left 0.42s cubic-bezier(0.34,1.56,0.64,1),
-                  background 0.6s ease;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.30);
-    }
-    #sl-knob.dragging { transition: none; cursor: grabbing; }
-    body.status-open #sl-knob {
-      left: calc(35% + 0px);
-      background: rgba(240,255,245,0.97);
-    }
-
-    #sl-knob-icon {
-      font-size: 3.2rem; line-height: 1;
-      color: rgba(0,0,0,0.30);
-      pointer-events: none;
-      position: relative; z-index: 2;
-    }
-
-    /* GREEN glow ring around knob when OPEN — pulsing halo, no rotation */
-    @keyframes knob-pulse {
-      0%, 100% {
-        box-shadow:
-          0 0 0 3px rgba(74,222,128,0.90),
-          0 0 14px 5px rgba(74,222,128,0.55),
-          0 0 32px 10px rgba(74,222,128,0.28),
-          0 0 56px 18px rgba(134,239,172,0.14);
-      }
-      50% {
-        box-shadow:
-          0 0 0 4px rgba(134,239,172,1.00),
-          0 0 22px 8px rgba(74,222,128,0.75),
-          0 0 48px 16px rgba(74,222,128,0.40),
-          0 0 80px 28px rgba(187,247,208,0.22);
-      }
-    }
-    body.status-open #sl-knob {
-      animation: knob-pulse 2.4s ease-in-out infinite;
-    }
-
     /* ── RIGHT panel — messages, same fixed height as left panel ── */
     #right-panel {
       align-self: end;
@@ -258,10 +187,10 @@
       padding: 0.8rem 1.2rem 1.2rem;
       background: rgba(0,0,0,0.48);
       border: 1px solid var(--border);
-      border-radius: 16px 16px 0 0;
+      border-radius: 16px;
       gap: 0.6rem;
       overflow: hidden;
-      height: clamp(200px, 40vh, 380px);
+      height: 100%;
     }
     body.status-open #right-panel { display: none; }
 
@@ -447,33 +376,6 @@
     .spo-del    { font-size: clamp(1.4rem,3.2vw,2.2rem); }
     body.status-open #open-screen  { display: flex; }
     body.status-open #layout       { display: none; }
-    body.status-open #faq-btn      { display: none; }
-    body.status-open #game-btn     { display: inline-flex; }
-
-    /* Decoratieve achtergrond in de slider track (vervangt externe GIFs) */
-    .slider-deco {
-      position: absolute; top: 0; bottom: 0;
-      width: 60%; height: 100%;
-      pointer-events: none; z-index: 0; border-radius: inherit;
-    }
-    #slider-deco-closed {
-      right: 0; left: auto;
-      background: radial-gradient(ellipse at 75% 50%, rgba(255,81,47,0.55), transparent 70%);
-      animation: deco-pulse 3.2s ease-in-out infinite alternate;
-    }
-    #slider-deco-open {
-      left: 0; right: auto;
-      background: radial-gradient(ellipse at 25% 50%, rgba(74,222,128,0.55), transparent 70%);
-      animation: deco-pulse 3.2s ease-in-out infinite alternate;
-      display: none;
-    }
-    @keyframes deco-pulse {
-      from { opacity: 0.14; transform: scale(0.94); }
-      to   { opacity: 0.28; transform: scale(1.06); }
-    }
-    body.status-open  #slider-deco-closed { display: none; }
-    body.status-open  #slider-deco-open   { display: block; }
-
 
     #right-title {
       font-size: clamp(1.1rem, 2.2vw, 1.6rem);
@@ -671,64 +573,6 @@
     :focus-visible { outline:3px solid rgba(255,255,255,0.60); outline-offset:2px; }
     :focus:not(:focus-visible) { outline:none; }
 
-    /* ── FAQ button — normale knop onder slider ── */
-    #faq-btn {
-      align-self: center;
-      display: inline-flex; flex-direction: row;
-      align-items: center; justify-content: center;
-      gap: 0.55rem;
-      padding: 0.55rem 1.4rem;
-      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
-      background-size: 200% auto; background-position: left center;
-      border: none; border-radius: 50px;
-      color: #fff;
-      font-family: var(--font);
-      cursor: pointer;
-      margin-bottom: 0.5rem;
-      box-shadow: 0 0 16px rgba(0,0,0,0.25);
-      transition: background-position 0.5s, transform 0.12s;
-    }
-    #faq-btn .faq-btn-icon { font-size: 1.5rem; line-height: 1; }
-    #faq-btn .faq-btn-label {
-      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
-      text-align: center; line-height: 1;
-    }
-    #faq-btn:hover   { background-position: right center; }
-    #faq-btn:active  { transform: scale(0.95); }
-
-    /* ── Knoppen-rij onder slider ── */
-    #action-btns {
-      display: flex; flex-direction: row;
-      align-items: center; justify-content: center;
-      gap: 0.7rem; flex-wrap: wrap;
-      margin-bottom: 0.5rem;
-    }
-    #faq-btn  { margin-bottom: 0; }
-    #game-btn {
-      display: inline-flex; flex-direction: row;
-      align-items: center; justify-content: center;
-      gap: 0.55rem;
-      padding: 0.55rem 1.4rem;
-      background-image: linear-gradient(to right, #ED4264 0%, #FFEDBC 51%, #ED4264 100%);
-      background-size: 200% auto; background-position: left center;
-      border: none; border-radius: 50px;
-      color: #fff;
-      font-family: var(--font);
-      cursor: pointer;
-      box-shadow: 0 0 16px rgba(0,0,0,0.25);
-      transition: background-position 0.5s, transform 0.12s;
-    }
-    body.status-open #game-btn {
-      background-image: linear-gradient(to right, #1CD8D2 0%, #93EDC7 51%, #1CD8D2 100%);
-    }
-    #game-btn .game-btn-icon  { font-size: 1.5rem; line-height: 1; }
-    #game-btn .game-btn-label {
-      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.12em;
-      text-align: center; line-height: 1;
-    }
-    #game-btn:hover  { background-position: right center; }
-    #game-btn:active { transform: scale(0.95); }
-
     /* ── FAQ Modal — full screen, accessible ── */
     #faq-overlay {
       position: fixed; inset: 0;
@@ -879,11 +723,89 @@
     }
     .faq-back-btn:hover  { background: rgba(255,255,255,0.18); color: #fff; }
     .faq-back-btn:active { background: rgba(255,255,255,0.24); }
+
+    /* ── Status tab (lipje top-right) ── */
+    #status-tab {
+      position: fixed; top: 0; right: 2rem; z-index: 30;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0.45rem 1.1rem 0.65rem;
+      background: rgba(255,255,255,0.13);
+      border: 1.5px solid rgba(255,255,255,0.24);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      color: rgba(255,255,255,0.75);
+      cursor: pointer;
+      gap: 0.15rem;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    #status-tab:hover  { background: rgba(255,255,255,0.22); color: #fff; }
+    #status-tab:active { background: rgba(255,255,255,0.30); }
+    #status-tab-icon  { font-size: 1.3rem; line-height: 1; }
+    #status-tab-label { font-size: 0.58rem; letter-spacing: 0.22em; }
+    /* ── Doorbell ── */
+    #doorbell-btn {
+      margin-top: auto; padding: 0.7rem 1rem;
+      min-height: 54px; width: 100%;
+      background: linear-gradient(to right, #f7971e, #ffd200);
+      border: none; border-radius: 12px;
+      color: #1a1000; font-family: var(--font);
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.14em;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 0.5rem;
+      box-shadow: 0 4px 18px rgba(255,180,0,0.35);
+      transition: filter 0.12s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    #doorbell-btn:hover  { filter: brightness(1.12); }
+    #doorbell-btn:active { transform: scale(0.95); }
+    #doorbell-icon { font-size: 1.5rem; }
+    /* ── Game tile ── */
+    #game-tile {
+      position: fixed; bottom: 1.2rem; right: 1.2rem; z-index: 25;
+      width: 120px;
+      cursor: pointer; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.55);
+      border: 2px solid rgba(255,255,255,0.18);
+      transition: transform 0.14s, box-shadow 0.14s;
+    }
+    #game-tile:hover  { transform: scale(1.06); box-shadow: 0 10px 32px rgba(0,0,0,0.70); }
+    #game-tile:active { transform: scale(0.97); }
+    #game-tile-img  { display: block; width: 100%; height: auto; }
+    #game-tile-label {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.72); color: #fff;
+      font-size: 0.72rem; letter-spacing: 0.14em;
+      text-align: center; padding: 0.3rem 0;
+    }
+    /* ── Game overlay ── */
+    #game-overlay {
+      position: fixed; inset: 0; z-index: 210;
+      background: #000;
+      display: flex; flex-direction: column;
+    }
+    #game-overlay[hidden] { display: none; }
+    #game-close {
+      position: absolute; top: 1rem; right: 1rem; z-index: 211;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.35);
+      color: #fff; font-size: 1.4rem; cursor: pointer;
+      display: grid; place-items: center;
+      transition: background 0.12s;
+    }
+    #game-close:hover { background: rgba(255,255,255,0.28); }
+    #game-frame { width: 100%; flex: 1; border: none; }
   </style>
 </head>
 <body class="status-closed">
 
   <div id="bg"></div>
+
+  <!-- Status tab — top-right lipje -->
+  <div id="status-tab" onclick="openSliderPin(currentStatus === 'closed' ? 'open' : 'closed')" title="Status wisselen">
+    <span id="status-tab-icon">⚙</span>
+    <span id="status-tab-label">STATUS</span>
+  </div>
 
   <!-- school label — invisible, triple-tap → admin -->
   <div id="school-label"></div>
@@ -891,31 +813,6 @@
   <!-- Status word: full-width, top -->
   <div id="status-word-wrap">
     <div id="status-word" role="status" aria-live="polite">GESLOTEN</div>
-  </div>
-
-  <!-- Slider row: alleen de slider -->
-  <div id="slider-row">
-    <div id="status-slider" aria-label="Status wisselen">
-      <div id="sl-track">
-        <div id="slider-deco-closed" class="slider-deco"></div>
-        <div id="slider-deco-open"   class="slider-deco"></div>
-        <div id="sl-knob"
-             role="slider" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0"
-             tabindex="0" aria-label="Sleep om status te wisselen">
-          <div id="sl-knob-icon">⇔</div>
-        </div>
-      </div>
-    </div>
-    <div id="action-btns">
-      <button id="faq-btn" onclick="openFaq()">
-        <span class="faq-btn-icon">❓</span>
-        <span class="faq-btn-label">VEELGESTELDE VRAGEN</span>
-      </button>
-      <button id="game-btn" onclick="toggleDinoGame()">
-        <span class="game-btn-icon">🎮</span>
-        <span class="game-btn-label">MINI-GAME</span>
-      </button>
-    </div>
   </div>
 
   <!-- OPEN welcome — step sequencer + piano lead -->
@@ -934,8 +831,8 @@
       <div id="seq-grid"></div>
     </div>
     <div id="piano-area">
-      <div id="synth-brand">BASS · PLUCK</div>
-      <div id="piano-label">Speel een bassline op de beat.</div>
+      <div id="synth-brand">PIANO · KEYS</div>
+      <div id="piano-label">Speel een melodie op de beat.</div>
       <div id="mini-piano" role="group" aria-label="Mini piano"></div>
     </div>
   </div>
@@ -953,6 +850,10 @@
           <textarea id="f-bericht" placeholder="Jouw bericht..."           required maxlength="600"></textarea>
           <button id="f-submit" type="submit">VERSTUUR →</button>
         </form>
+        <button id="doorbell-btn" onclick="playLotrDoorbell()" type="button">
+          <span id="doorbell-icon">🔔</span>
+          <span id="doorbell-label">BEL AAN</span>
+        </button>
       </div>
       <div id="open-welcome">
         <div id="open-welcome-text">KOM GERUST<br>BINNEN</div>
@@ -1068,17 +969,6 @@
       if (k) handlePinKey(k.dataset.k);
     });
 
-    // ── Slider — PIN beschermd ────────────────────────────────
-    const slKnob = document.getElementById('sl-knob');
-    slKnob.addEventListener('pointerdown', e => {
-      e.preventDefault();
-      openSliderPin(currentStatus === 'closed' ? 'open' : 'closed');
-    });
-    slKnob.addEventListener('keydown', e => {
-      if (e.key === 'ArrowRight' && currentStatus === 'closed') openSliderPin('open');
-      if (e.key === 'ArrowLeft'  && currentStatus === 'open')   openSliderPin('closed');
-    });
-
     // ── Status ───────────────────────────────────────────────
     function applyStatus(s, animate = true) {
       currentStatus = s; save(KEY_S, s);
@@ -1091,7 +981,6 @@
       }
       const isOpen = s === 'open';
       document.getElementById('status-word').textContent = isOpen ? 'OPEN' : 'GESLOTEN';
-      document.getElementById('sl-knob').setAttribute('aria-valuenow', isOpen ? '1' : '0');
     }
 
     function checkUnread() {
@@ -1455,7 +1344,7 @@
       return audioCtx;
     }
 
-    // Bass pluck: triangle + sub sine, punchy attack — voor basslines op beats
+    // Piano: sine + harmonics, fast attack, natural decay
     function noteOn(freq) {
       const ctx = getAudioCtx();
       const now = ctx.currentTime;
@@ -1463,47 +1352,37 @@
       const env = ctx.createGain();
       env.connect(ctx.destination);
       env.gain.setValueAtTime(0.001, now);
-      env.gain.linearRampToValueAtTime(0.85, now + 0.010); // punchy aanslag
-      env.gain.exponentialRampToValueAtTime(0.60, now + 0.10); // snel decay naar sustain
-
-      const filt = ctx.createBiquadFilter();
-      filt.type = 'lowpass'; filt.Q.value = 1.4;
-      filt.frequency.setValueAtTime(600, now);
-      filt.frequency.exponentialRampToValueAtTime(1400, now + 0.04); // filter opent kort
-      filt.connect(env);
+      env.gain.linearRampToValueAtTime(0.65, now + 0.006);
+      env.gain.exponentialRampToValueAtTime(0.35, now + 0.25);
 
       const oscs = [];
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'triangle'; o.frequency.value = freq;
-      o.connect(g); g.connect(filt); g.gain.value = 2.0;
-      o.start(now); oscs.push(o);
-
-      const sub = ctx.createOscillator(), subG = ctx.createGain();
-      sub.type = 'sine'; sub.frequency.value = freq / 2;
-      sub.connect(subG); subG.connect(env); subG.gain.value = 1.375;
-      sub.start(now); oscs.push(sub);
+      [[1, 0.70], [2, 0.28], [3, 0.14], [4, 0.07]].forEach(([mul, amp]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = freq * mul;
+        o.connect(g); g.connect(env); g.gain.value = amp;
+        o.start(now); oscs.push(o);
+      });
 
       return { oscs, env };
     }
 
     function noteOff(note) {
       if (!note) return;
-      const ctx = getAudioCtx(), now = ctx.currentTime, rel = 0.14;
+      const ctx = getAudioCtx(), now = ctx.currentTime, rel = 0.45;
       note.env.gain.setValueAtTime(note.env.gain.value, now);
       note.env.gain.exponentialRampToValueAtTime(0.001, now + rel);
       note.oscs.forEach(o => { try { o.stop(now + rel + 0.05); } catch(e){} });
     }
 
-    // C3–C4 (1 octaaf lager, 8 witte + 5 zwarte toetsen → 62px per witte toets op 500px)
     const PIANO_NOTES = [
-      { freq:130.81,black:false },{ freq:138.59,black:true, pos:1 },
-      { freq:146.83,black:false },{ freq:155.56,black:true, pos:2 },
-      { freq:164.81,black:false },
-      { freq:174.61,black:false },{ freq:185.00,black:true, pos:4 },
-      { freq:196.00,black:false },{ freq:207.65,black:true, pos:5 },
-      { freq:220.00,black:false },{ freq:233.08,black:true, pos:6 },
-      { freq:246.94,black:false },
-      { freq:261.63,black:false },
+      { freq:261.63,black:false },{ freq:277.18,black:true, pos:1 },
+      { freq:293.66,black:false },{ freq:311.13,black:true, pos:2 },
+      { freq:329.63,black:false },
+      { freq:349.23,black:false },{ freq:369.99,black:true, pos:4 },
+      { freq:392.00,black:false },{ freq:415.30,black:true, pos:5 },
+      { freq:440.00,black:false },{ freq:466.16,black:true, pos:6 },
+      { freq:493.88,black:false },
+      { freq:523.25,black:false },
     ];
 
     function buildPiano() {
@@ -1711,427 +1590,57 @@
       if (document.visibilityState === 'visible') requestWakeLock();
     });
 
+    // ── LOTR 8-bit deurbel ───────────────────────────────────
+    function playLotrDoorbell() {
+      const ctx = getAudioCtx();
+      const now = ctx.currentTime;
+      const notes = [
+        [293.66,0.18],[329.63,0.18],[349.23,0.18],[392.00,0.10],[440.00,0.10],
+        [466.16,0.22],[440.00,0.18],[392.00,0.18],[349.23,0.18],[329.63,0.18],
+        [293.66,0.36],[0,0.10],
+        [440.00,0.18],[466.16,0.18],[440.00,0.18],[392.00,0.42],
+        [0,0.10],[349.23,0.18],[392.00,0.18],[440.00,0.60],
+      ];
+      let t = now;
+      notes.forEach(([freq, dur]) => {
+        if (freq === 0) { t += dur; return; }
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'square'; o.frequency.value = freq;
+        o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.0, t);
+        g.gain.linearRampToValueAtTime(0.22, t + 0.008);
+        g.gain.setValueAtTime(0.22, t + dur - 0.025);
+        g.gain.linearRampToValueAtTime(0.0, t + dur);
+        o.start(t); o.stop(t + dur + 0.01);
+        t += dur;
+      });
+    }
+
+    function openGame() {
+      document.getElementById('game-frame').src = 'https://vimm.net/vault/?p=play&mediaId=1645';
+      document.getElementById('game-overlay').hidden = false;
+    }
+    function closeGame() {
+      document.getElementById('game-frame').src = '';
+      document.getElementById('game-overlay').hidden = true;
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('game-overlay').hidden) closeGame();
+    });
+
   </script>
 
-  <!-- ── Offline mini-game ── -->
-  <style>
-    #dino-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      display: none; overflow: hidden;
-      background: #0d1422;
-    }
-    #dino-overlay.active { display: block; }
-    #dino-canvas { display: block; width: 100%; height: 100%; }
-  </style>
 
-  <div id="dino-overlay" aria-label="Offline mini-game">
-    <canvas id="dino-canvas"></canvas>
+  <div id="game-tile" onclick="openGame()">
+    <img id="game-tile-img" src="https://dl.vimm.net/image.php?type=box_large&id=1676" alt="Game" draggable="false">
+    <div id="game-tile-label">▶ SPEEL</div>
   </div>
 
-  <script>
-  /* Offline runner v3 — perf geoptimaliseerd (Chromebook),
-     pre-rendered flora + achtergrond, 2 parallax-lagen, lagere gebouwen
-     Trigger: window offline | Alt+G testen | Escape sluiten */
-  (function () {
-    const OL = document.getElementById('dino-overlay');
-    const CV = document.getElementById('dino-canvas');
-    const CX = CV.getContext('2d');
+  <div id="game-overlay" hidden>
+    <button id="game-close" onclick="closeGame()" aria-label="Sluiten">✕</button>
+    <iframe id="game-frame" src="" allowfullscreen allow="autoplay; gamepad"></iframe>
+  </div>
 
-    let W = 0, H = 0, GND = 0;
-    let bgCache = null;    // pre-rendered sky + sterren
-
-    function renderBg() {
-      bgCache = document.createElement('canvas');
-      bgCache.width = W; bgCache.height = H;
-      const bx = bgCache.getContext('2d');
-      const sky = bx.createLinearGradient(0,0,0,H);
-      sky.addColorStop(0,'#0d1830'); sky.addColorStop(0.65,'#1e3060'); sky.addColorStop(1,'#0a1020');
-      bx.fillStyle = sky; bx.fillRect(0,0,W,H);
-      bx.fillStyle = 'rgba(255,255,255,0.5)';
-      for (let i=0;i<45;i++) bx.fillRect((i*137+71)%W, (i*83+17)%(H*0.50), 1.5, 1.5);
-    }
-    function resize() {
-      W = CV.width  = OL.clientWidth;
-      H = CV.height = OL.clientHeight;
-      GND = H * 0.75;
-      renderBg();
-    }
-
-    // ── State ────────────────────────────────────────────────
-    const S = { IDLE: 0, RUN: 1, DEAD: 2 };
-    let gs = S.IDLE;
-    let score = 0, best = +localStorage.getItem('dino-best') || 0;
-    let spd = 5, tick = 0, raf = null;
-
-    // ── Player (2× groter) ───────────────────────────────────
-    const P = { x: 100, y: 0, vy: 0, duck: false, grounded: true,
-                W: 84, H: 124, dW: 104, dH: 64 };
-    const pw = () => P.duck ? P.dW : P.W;
-    const ph = () => P.duck ? P.dH : P.H;
-
-    function pReset() { P.y = GND - ph(); P.vy = 0; P.duck = false; P.grounded = true; }
-    function pJump()  { if (!P.grounded) return; P.vy = -22; P.grounded = false; }
-    function pUpdate() {
-      if (!P.grounded) {
-        P.vy += 0.85; P.y += P.vy;
-        if (P.y >= GND - ph()) { P.y = GND - ph(); P.vy = 0; P.grounded = true; }
-      } else {
-        P.y = GND - ph();
-      }
-    }
-
-    // ── Obstacles ────────────────────────────────────────────
-    // Billboard: y=GND-132, h=58  → duck player (GND-64) top+10=GND-54 < bottom-10=GND-84? NO → safe
-    // Crow:      y=GND-135, h=50  → duck player top+10=GND-54 < bottom-10=GND-95?       NO → safe
-    let obs = [], nextObs = 100;
-    function spawnObs() {
-      const canFox  = score > 600;
-      const canCrow = score > 1200;
-      const pool = ['bld','bld','bld','bld','bill','bill'];
-      if (canFox)  pool.push('fox','fox');
-      if (canCrow) pool.push('crow','crow');
-      const type = pool[Math.floor(Math.random() * pool.length)];
-      switch (type) {
-        case 'bld': {
-          const h = 70 + Math.random() * 40;
-          obs.push({ x: W+20, y: GND-h, w: 55+Math.random()*35, h, type }); break;
-        }
-        case 'bill':
-          obs.push({ x: W+20, y: GND-132, w: 90, h: 58, type }); break;
-        case 'fox': {
-          const h = 58 + Math.random() * 14;
-          obs.push({ x: W+20, y: GND-h, w: 72, h, type }); break;
-        }
-        case 'crow':
-          obs.push({ x: W+20, y: GND-135, w: 72, h: 50, type }); break;
-      }
-      nextObs = Math.max(45, 100 + Math.random()*120 - score/100);
-    }
-
-    // ── Parallax flora ───────────────────────────────────────
-    let flora = { mid:[], near:[] };
-    let poff  = { mid:0, near:0 };
-    function initFlora() {
-      flora.mid = [];
-      for (let x=0; x<2400; x += 130+Math.random()*100)
-        flora.mid.push({ x, h: 55+Math.random()*40, t: Math.random()<0.55?'pine':'oak' });
-      flora.near = [];
-      for (let x=0; x<1600; x += 90+Math.random()*60)
-        flora.near.push({ x, h: 18+Math.random()*14, t:'bush' });
-      poff = { mid:0, near:0 };
-    }
-
-    // ── Helpers ───────────────────────────────────────────────
-    function rr(x, y, w, h, r) {
-      if (CX.roundRect) { CX.beginPath(); CX.roundRect(x, y, w, h, r); return; }
-      CX.beginPath();
-      CX.moveTo(x+r,y); CX.arcTo(x+w,y,x+w,y+r,r); CX.arcTo(x+w,y+h,x+w-r,y+h,r);
-      CX.arcTo(x,y+h,x,y+h-r,r); CX.arcTo(x,y,x+r,y,r); CX.closePath();
-    }
-
-    // ── Flora (pixel-art) ─────────────────────────────────────
-    function drawPine(x, baseY, h) {
-      const tw = Math.max(4, h*0.10), th = h*0.22, cw = h*0.55;
-      CX.fillStyle = '#5C3A1E'; CX.fillRect(x-tw/2, baseY-th, tw, th);
-      for (let i=0; i<5; i++) {
-        const lw = cw*(5-i)/5, ly = baseY-th-h*0.78*(i+1)/5;
-        CX.fillStyle = i%2===0 ? '#1E5C14' : '#267A1C';
-        CX.fillRect(x-lw/2, ly, lw, h*0.78/5*1.3);
-      }
-    }
-    function drawOak(x, baseY, h) {
-      const tw = Math.max(4, h*0.10), th = h*0.38, cr = h*0.38;
-      CX.fillStyle = '#6B4226'; CX.fillRect(x-tw/2, baseY-th, tw, th);
-      CX.fillStyle = '#267020';
-      CX.fillRect(x-cr, baseY-th-cr*1.1, cr*2, cr*1.1);
-      CX.fillRect(x-cr*0.7, baseY-th-cr*1.55, cr*1.4, cr*0.5);
-      CX.fillStyle = '#338A28';
-      CX.fillRect(x-cr*0.6, baseY-th-cr*1.2, cr*0.5, cr*0.4);
-    }
-    function drawBush(x, baseY, h) {
-      CX.fillStyle = '#1A6010';
-      CX.fillRect(x-h, baseY-h*0.65, h*2, h*0.65);
-      CX.fillRect(x-h*0.6, baseY-h, h*1.2, h*0.4);
-      CX.fillStyle = '#228018';
-      CX.fillRect(x-h*0.7, baseY-h*0.8, h*0.4, h*0.3);
-    }
-
-    // ── Obstakels ─────────────────────────────────────────────
-    function drawBuilding(x, y, w, h) {
-      CX.fillStyle = '#7A8A9A'; CX.fillRect(x, y, w, h);
-      CX.fillStyle = '#4A5A6A'; CX.fillRect(x, y, w, 6);
-      CX.fillStyle = 'rgba(0,0,0,0.18)'; CX.fillRect(x+w-5, y+6, 5, h-6);
-      const cols = Math.max(1, Math.floor(w/18)), rows = Math.max(1, Math.floor((h-12)/22));
-      for (let c=0; c<cols; c++) for (let r=0; r<rows; r++) {
-        CX.fillStyle = (c*3+r*5)%7!==0 ? '#FFE87C' : '#2A3040';
-        CX.fillRect(x+5+c*18, y+10+r*22, 10, 12);
-      }
-    }
-    function drawBillboard(x, y, w, h) {
-      CX.fillStyle = '#888';
-      CX.fillRect(x+w*0.2-3, y+h, 6, GND-y-h+2);
-      CX.fillRect(x+w*0.8-3, y+h, 6, GND-y-h+2);
-      CX.fillStyle = '#F0E8D0'; CX.fillRect(x, y, w, h);
-      CX.fillStyle = '#C8B880'; CX.fillRect(x, y, w, 5); CX.fillRect(x, y+h-5, w, 5);
-      CX.fillStyle = '#1a3a6b';
-      CX.font = `bold ${Math.max(10,h*0.44)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-      CX.textAlign = 'center'; CX.textBaseline = 'middle';
-      CX.fillText('DALTON', x+w/2, y+h*0.38);
-      CX.font = `${Math.max(7,h*0.24)}px 'Barlow Condensed',sans-serif`;
-      CX.fillText('DEN HAAG', x+w/2, y+h*0.72);
-    }
-
-    // ── Vijanden ──────────────────────────────────────────────
-    function drawFox(x, y, h) {
-      const bY = y+h, sw = Math.sin(tick*0.38)*6;
-      CX.save();
-      CX.fillStyle = '#E8630A';
-      CX.beginPath(); CX.ellipse(x+h*0.12, bY-h*0.42, h*0.26, h*0.16, -0.4, 0, Math.PI*2); CX.fill();
-      CX.fillStyle = '#fff';
-      CX.beginPath(); CX.ellipse(x+h*0.09, bY-h*0.42, h*0.11, h*0.07, -0.4, 0, Math.PI*2); CX.fill();
-      CX.fillStyle = '#E8630A'; rr(x+h*0.26, bY-h*0.62, h*0.64, h*0.40, h*0.08); CX.fill();
-      CX.fillStyle = '#fff';    rr(x+h*0.38, bY-h*0.55, h*0.35, h*0.30, h*0.06); CX.fill();
-      CX.fillStyle = '#E8630A'; rr(x+h*0.64, bY-h*0.82, h*0.36, h*0.38, h*0.09); CX.fill();
-      CX.fillStyle = '#fff';    rr(x+h*0.84, bY-h*0.67, h*0.22, h*0.20, h*0.05); CX.fill();
-      CX.fillStyle = '#333'; CX.beginPath(); CX.arc(x+h*1.02, bY-h*0.60, h*0.04, 0, Math.PI*2); CX.fill();
-      CX.fillStyle = '#222'; CX.beginPath(); CX.arc(x+h*0.76,  bY-h*0.76, h*0.045, 0, Math.PI*2); CX.fill();
-      CX.fillStyle = '#E8630A';
-      CX.beginPath(); CX.moveTo(x+h*0.66,bY-h*0.80); CX.lineTo(x+h*0.60,bY-h*1.02); CX.lineTo(x+h*0.76,bY-h*0.88); CX.fill();
-      CX.beginPath(); CX.moveTo(x+h*0.82,bY-h*0.80); CX.lineTo(x+h*0.82,bY-h*1.02); CX.lineTo(x+h*0.96,bY-h*0.86); CX.fill();
-      CX.fillStyle = '#C44A00';
-      rr(x+h*0.30,bY-h*0.25,h*0.12,h*0.25+sw,h*0.03); CX.fill();
-      rr(x+h*0.46,bY-h*0.25,h*0.12,h*0.25-sw,h*0.03); CX.fill();
-      rr(x+h*0.62,bY-h*0.25,h*0.12,h*0.25+sw,h*0.03); CX.fill();
-      rr(x+h*0.78,bY-h*0.25,h*0.12,h*0.25-sw,h*0.03); CX.fill();
-      CX.restore();
-    }
-    function drawCrow(x, y, w, h) {
-      const cx2 = x+w*0.5, cy2 = y+h*0.5, wf = Math.sin(tick*0.22)*0.7;
-      CX.save();
-      CX.fillStyle = '#18182A';
-      CX.beginPath(); CX.ellipse(cx2+w*0.05, cy2+h*0.10, w*0.30, h*0.28, 0, 0, Math.PI*2); CX.fill();
-      CX.fillStyle = '#101020';
-      CX.beginPath(); CX.moveTo(cx2+w*0.32,cy2+h*0.08); CX.lineTo(x+w+8,cy2); CX.lineTo(x+w+8,cy2+h*0.22); CX.lineTo(cx2+w*0.32,cy2+h*0.22); CX.fill();
-      CX.save(); CX.translate(cx2-w*0.08, cy2-h*0.05); CX.rotate(wf-0.2);
-      CX.fillStyle='#202038'; CX.beginPath(); CX.ellipse(-w*0.28,-h*0.15,w*0.32,h*0.14,0.3,0,Math.PI*2); CX.fill(); CX.restore();
-      CX.save(); CX.translate(cx2+w*0.18, cy2-h*0.05); CX.rotate(-(wf-0.2));
-      CX.fillStyle='#202038'; CX.beginPath(); CX.ellipse(w*0.22,-h*0.15,w*0.28,h*0.12,-0.3,0,Math.PI*2); CX.fill(); CX.restore();
-      CX.fillStyle='#18182A'; CX.beginPath(); CX.arc(cx2-w*0.28,cy2-h*0.08,h*0.24,0,Math.PI*2); CX.fill();
-      CX.fillStyle='#777766'; CX.beginPath(); CX.moveTo(cx2-w*0.48,cy2-h*0.08); CX.lineTo(cx2-w*0.62,cy2-h*0.02); CX.lineTo(cx2-w*0.48,cy2+h*0.10); CX.fill();
-      CX.fillStyle='#fff'; CX.beginPath(); CX.arc(cx2-w*0.32,cy2-h*0.14,h*0.07,0,Math.PI*2); CX.fill();
-      CX.fillStyle='#111'; CX.beginPath(); CX.arc(cx2-w*0.33,cy2-h*0.14,h*0.04,0,Math.PI*2); CX.fill();
-      CX.restore();
-    }
-
-    // ── Zelda-type held: zilver harnas, lang haar, puntoren, zwaard ──
-    function drawStudent(x, y) {
-      const dk = P.duck;
-      const SKIN='#f4d4a0', HAIR='#dcdce8', HAIR2='#b0b0c8',
-            TUNIC='#7a8ea8', CHAIN='#9aaec0', BELT='#5a3c1a',
-            LEGS='#55606e', BOOTS='#3c2814', SILVER='#d4d4e4', GOLD='#c8a020';
-      CX.save();
-      if (!dk) {
-        const sw = Math.sin(tick*0.28)*16;
-        // Lang haar (achter lichaam, golvend)
-        CX.fillStyle = HAIR2;
-        CX.beginPath();
-        CX.moveTo(x+44,y+12);
-        CX.bezierCurveTo(x+18,y+22,x+10,y+58,x+16,y+90);
-        CX.lineTo(x+30,y+86); CX.bezierCurveTo(x+24,y+60,x+30,y+30,x+50,y+20);
-        CX.closePath(); CX.fill();
-        // Zwaard (rechterhand, schuin omhoog)
-        CX.save(); CX.translate(x+78,y+58); CX.rotate(-0.30);
-        CX.fillStyle=SILVER; CX.fillRect(-3,-38,5,38);
-        CX.fillStyle=GOLD;   CX.fillRect(-9,0,18,4);
-        CX.fillStyle=BELT;   CX.fillRect(-2,4,4,13);
-        CX.restore();
-        // Harnas / tuniek
-        CX.fillStyle=TUNIC; rr(x+36,y+36,34,46,6); CX.fill();
-        CX.fillStyle=CHAIN;
-        [y+41,y+52,y+63,y+72].forEach(ly=>CX.fillRect(x+36,ly,34,3));
-        // Riem + gesp
-        CX.fillStyle=BELT;  CX.fillRect(x+33,y+78,40,7);
-        CX.fillStyle=GOLD;  CX.fillRect(x+50,y+79,8,5);
-        // Hoofd
-        CX.fillStyle=SKIN;  CX.beginPath(); CX.arc(x+54,y+23,21,0,Math.PI*2); CX.fill();
-        // Haar boven
-        CX.fillStyle=HAIR; CX.beginPath(); CX.ellipse(x+54,y+8,22,14,0,Math.PI,Math.PI*2); CX.fill();
-        CX.fillRect(x+33,y+8,10,22);
-        // Puntig oor
-        CX.fillStyle=SKIN;
-        CX.beginPath(); CX.moveTo(x+33,y+19); CX.lineTo(x+25,y+23); CX.lineTo(x+33,y+30); CX.fill();
-        // Ogen (elfachtig, amandelvormig)
-        CX.fillStyle='#1a2840';
-        CX.beginPath(); CX.ellipse(x+46,y+23,4,3,-0.2,0,Math.PI*2); CX.fill();
-        CX.beginPath(); CX.ellipse(x+62,y+23,4,3, 0.2,0,Math.PI*2); CX.fill();
-        CX.fillStyle='rgba(255,255,255,0.55)';
-        CX.beginPath(); CX.arc(x+47,y+22,1.2,0,Math.PI*2); CX.fill();
-        CX.beginPath(); CX.arc(x+63,y+22,1.2,0,Math.PI*2); CX.fill();
-        // Benen
-        CX.fillStyle=LEGS;
-        rr(x+40,y+80,13,30+sw,4); CX.fill();
-        rr(x+57,y+80,13,30-sw,4); CX.fill();
-        // Laarzen
-        CX.fillStyle=BOOTS;
-        CX.fillRect(x+36,y+106+sw,20,14); CX.fillRect(x+53,y+106-sw,20,14);
-      } else {
-        // === GEDOKEN ===
-        // Haar (naar voren geslingerd)
-        CX.fillStyle=HAIR2;
-        CX.beginPath();
-        CX.moveTo(x+74,y+6); CX.bezierCurveTo(x+102,y+10,x+106,y+30,x+100,y+44);
-        CX.lineTo(x+88,y+40); CX.bezierCurveTo(x+92,y+28,x+88,y+14,x+68,y+10);
-        CX.closePath(); CX.fill();
-        // Zwaard (horizontaal, slashend)
-        CX.fillStyle=SILVER; CX.fillRect(x+78,y+18,28,5);
-        CX.fillStyle=GOLD;   CX.fillRect(x+74,y+14,5,13);
-        CX.fillStyle=BELT;   CX.fillRect(x+68,y+17,6,7);
-        // Harnas
-        CX.fillStyle=TUNIC; rr(x+34,y+14,42,28,6); CX.fill();
-        CX.fillStyle=CHAIN; CX.fillRect(x+34,y+19,42,3); CX.fillRect(x+34,y+29,42,3);
-        CX.fillStyle=BELT;  CX.fillRect(x+32,y+38,46,6);
-        CX.fillStyle=GOLD;  CX.fillRect(x+50,y+39,8,4);
-        // Hoofd
-        CX.fillStyle=SKIN; CX.beginPath(); CX.arc(x+74,y+16,18,0,Math.PI*2); CX.fill();
-        CX.fillStyle=HAIR; CX.beginPath(); CX.ellipse(x+74,y+3,18,11,-0.1,Math.PI,Math.PI*2); CX.fill();
-        // Puntig oor
-        CX.fillStyle=SKIN;
-        CX.beginPath(); CX.moveTo(x+57,y+12); CX.lineTo(x+50,y+16); CX.lineTo(x+57,y+23); CX.fill();
-        // Ogen
-        CX.fillStyle='#1a2840';
-        CX.beginPath(); CX.ellipse(x+66,y+17,3.5,2.5,-0.2,0,Math.PI*2); CX.fill();
-        CX.beginPath(); CX.ellipse(x+80,y+17,3.5,2.5, 0.2,0,Math.PI*2); CX.fill();
-        // Benen (gehurkt)
-        CX.fillStyle=LEGS;
-        rr(x+34,y+42,15,22,4); CX.fill(); rr(x+53,y+42,15,22,4); CX.fill();
-        // Laarzen
-        CX.fillStyle=BOOTS;
-        CX.fillRect(x+30,y+60,22,8); CX.fillRect(x+49,y+60,22,8);
-      }
-      CX.restore();
-    }
-
-    // ── Collision ─────────────────────────────────────────────
-    function hits(o) {
-      const m = 10;
-      return (P.x+m) < (o.x+o.w-m) && (P.x+pw()-m) > (o.x+m) &&
-             (P.y+m) < (o.y+o.h-m) && (P.y+ph()-m) > (o.y+m);
-    }
-
-    // ── Loop ──────────────────────────────────────────────────
-    function update() {
-      const ps = gs === S.RUN ? spd : 1.5;
-      poff.mid  += ps * 0.42;
-      poff.near += ps * 0.80;
-      if (gs !== S.RUN) return;
-      tick++; score++; spd = 5 + score * 0.0013;
-      pUpdate();
-      nextObs--; if (nextObs <= 0) spawnObs();
-      obs.forEach(o => { o.x -= o.type === 'fox' ? spd * 1.3 + 1 : spd; });
-      obs = obs.filter(o => o.x + o.w > -10);
-      if (obs.some(hits)) {
-        gs = S.DEAD;
-        if (score > best) { best = score; localStorage.setItem('dino-best', best); }
-      }
-    }
-
-    function draw() {
-      CX.clearRect(0, 0, W, H);
-      if (bgCache) CX.drawImage(bgCache, 0, 0);
-
-      // Mid trees — one globalAlpha for the whole layer
-      CX.save(); CX.globalAlpha = 0.28;
-      const mR=2400; flora.mid.forEach(it => {
-        const dx = ((it.x-poff.mid)%mR+mR)%mR-150;
-        if (dx>-120&&dx<W+120) it.t==='pine' ? drawPine(dx,GND,it.h) : drawOak(dx,GND,it.h);
-      });
-      CX.restore();
-
-      // Ground
-      CX.fillStyle='rgba(14,30,60,0.55)'; CX.fillRect(0,GND,W,H-GND);
-
-      // Near bushes — one globalAlpha for the whole layer
-      CX.save(); CX.globalAlpha = 0.50;
-      const nR=1600; flora.near.forEach(it => {
-        const dx = ((it.x-poff.near)%nR+nR)%nR-80;
-        if (dx>-80&&dx<W+80) drawBush(dx, GND, it.h);
-      });
-      CX.restore();
-
-      CX.strokeStyle='rgba(80,120,180,0.32)'; CX.lineWidth=2;
-      CX.beginPath(); CX.moveTo(0,GND); CX.lineTo(W,GND); CX.stroke();
-
-      obs.forEach(o => {
-        if (o.type==='bld')        drawBuilding(o.x, o.y, o.w, o.h);
-        else if (o.type==='bill')  drawBillboard(o.x, o.y, o.w, o.h);
-        else if (o.type==='fox')   drawFox(o.x, o.y, o.h);
-        else if (o.type==='crow')  drawCrow(o.x, o.y, o.w, o.h);
-      });
-      drawStudent(P.x, P.y);
-
-      CX.save();
-      CX.fillStyle='rgba(255,255,255,0.80)';
-      CX.font=`bold ${Math.max(14,W*0.022)}px 'Barlow Condensed',sans-serif`;
-      CX.textAlign='right'; CX.textBaseline='top';
-      CX.fillText('HI '+String(best).padStart(5,'0')+'  '+String(score).padStart(5,'0'), W-24, 22);
-      CX.restore();
-
-      const af = `bold ${Math.max(16,W*0.028)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-      if (score>=580&&score<=660) {
-        CX.save(); CX.globalAlpha=Math.max(0,1-Math.abs(score-620)/40);
-        CX.fillStyle='#FFB020'; CX.font=af; CX.textAlign='center'; CX.textBaseline='top';
-        CX.fillText('🦊 DE VOS IS IN HET VELD!', W/2, H*0.06); CX.restore();
-      }
-      if (score>=1180&&score<=1260) {
-        CX.save(); CX.globalAlpha=Math.max(0,1-Math.abs(score-1220)/40);
-        CX.fillStyle='#C090FF'; CX.font=af; CX.textAlign='center'; CX.textBaseline='top';
-        CX.fillText('🐦 DE KRAAI VLIEGT MEE!', W/2, H*0.06); CX.restore();
-      }
-      if (gs !== S.RUN) {
-        CX.save(); CX.textAlign='center'; CX.textBaseline='middle';
-        CX.fillStyle='rgba(255,255,255,0.92)';
-        CX.font=`bold ${Math.max(26,W*0.042)}px 'Bebas Neue','Barlow Condensed',sans-serif`;
-        CX.fillText(gs===S.DEAD?'GAME OVER':'MINI GAME', W/2, H*0.43);
-        CX.fillStyle='rgba(255,255,255,0.55)';
-        CX.font=`${Math.max(14,W*0.021)}px 'Barlow Condensed',sans-serif`;
-        CX.fillText('Tik of druk SPATIE om te spelen', W/2, H*0.52); CX.restore();
-      }
-    }
-
-    function loop() { update(); draw(); raf = requestAnimationFrame(loop); }
-
-    function startGame() {
-      score=0; spd=5; tick=0; obs=[]; nextObs=100; pReset(); gs=S.RUN;
-    }
-    function show() {
-      OL.classList.add('active'); resize(); initFlora(); pReset(); gs=S.IDLE;
-      if (!raf) raf = requestAnimationFrame(loop);
-    }
-    function hide() {
-      OL.classList.remove('active');
-      if (raf) { cancelAnimationFrame(raf); raf=null; } gs=S.IDLE;
-    }
-
-    document.addEventListener('keydown', e => {
-      if (!OL.classList.contains('active')) return;
-      if (e.code==='Space'||e.code==='ArrowUp') { e.preventDefault(); if (gs!==S.RUN) startGame(); else pJump(); }
-      if (e.code==='ArrowDown') { e.preventDefault(); P.duck=true; }
-      if (e.code==='Escape') hide();
-    });
-    document.addEventListener('keyup', e => { if (e.code==='ArrowDown') P.duck=false; });
-    OL.addEventListener('pointerdown', e => {
-      if (gs!==S.RUN) { startGame(); return; }
-      e.clientY > OL.clientHeight*0.58 ? (P.duck=true) : pJump();
-    });
-    OL.addEventListener('pointerup', () => { P.duck=false; });
-    window.addEventListener('resize', () => { if (OL.classList.contains('active')) { resize(); if (gs!==S.RUN) pReset(); } });
-
-    window.toggleDinoGame = () => OL.classList.contains('active') ? hide() : show();
-    window.addEventListener('offline', show);
-    window.addEventListener('online',  hide);
-    document.addEventListener('keydown', e => { if (e.altKey&&e.code==='KeyG') OL.classList.contains('active')?hide():show(); });
-    if (!navigator.onLine) show();
-  })();
-  </script>
+  
 </body>
 </html>
