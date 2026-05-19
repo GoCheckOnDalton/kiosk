@@ -789,6 +789,31 @@
       text-align: center; line-height: 1.2;
     }
 
+    /* ── FAQ tile (fixed, bottom-right) ── */
+    #faq-tile {
+      position: fixed; bottom: 1.6rem; right: 1.6rem; z-index: 10;
+      display: flex; flex-direction: column; align-items: center;
+      width: 90px;
+      padding: 1rem 0.8rem 0.9rem;
+      background: rgba(0,10,4,0.82);
+      border: 2px solid rgba(0,255,65,0.45);
+      border-radius: 16px;
+      color: #00ff41;
+      cursor: pointer;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.10s;
+      box-shadow: 0 4px 18px rgba(0,255,65,0.22);
+      user-select: none;
+    }
+    #faq-tile:hover  { background: rgba(0,255,65,0.12); box-shadow: 0 4px 28px rgba(0,255,65,0.50); }
+    #faq-tile:active { transform: scale(0.93); }
+    #faq-tile-icon  { font-size: 2.2rem; line-height: 1; }
+    #faq-tile-label {
+      font-size: 0.68rem; letter-spacing: 0.22em;
+      text-align: center; line-height: 1.2;
+    }
+
     /* ── Game overlay ── */
     #game-overlay {
       position: fixed; inset: 0; z-index: 210;
@@ -953,6 +978,12 @@
     <span id="game-tile-icon">🎮</span>
     <span id="game-tile-label">Gaming</span>
   </div>
+
+  <!-- FAQ tile → beslisboom -->
+  <a id="faq-tile" href="faq.html" title="Veelgestelde vragen & beslisboom">
+    <span id="faq-tile-icon">❓</span>
+    <span id="faq-tile-label">FAQ</span>
+  </a>
 
   <!-- Game overlay -->
   <div id="game-overlay" hidden>

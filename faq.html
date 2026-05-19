@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>FAQ Beslisboom · ICT Desk · Dalton Den Haag</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent:  #00ff41;
+      --acc-dim: rgba(0,255,65,0.18);
+      --acc-brd: rgba(0,255,65,0.35);
+      --font:    'Barlow Condensed', 'Arial Narrow', sans-serif;
+    }
+
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      height: 100%;
+      font-family: var(--font);
+      background: #0b0b14;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 4px; }
+
+    /* ── Page shell ── */
+    #page { display: flex; flex-direction: column; min-height: 100%; }
+
+    /* ── Header ── */
+    #header {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(11,11,20,0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1.5px solid rgba(0,255,65,0.14);
+      padding: 1rem 1.4rem 0.9rem;
+      display: flex; flex-direction: column; gap: 0.85rem;
+      flex-shrink: 0;
+    }
+    #header-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    #home-btn {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.55rem 1.1rem;
+      background: rgba(0,255,65,0.08);
+      border: 1.5px solid rgba(0,255,65,0.28);
+      border-radius: 10px;
+      color: var(--accent); font-family: var(--font);
+      font-size: 0.88rem; font-weight: 700; letter-spacing: 0.14em;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.10s;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    #home-btn:hover  { background: rgba(0,255,65,0.16); border-color: rgba(0,255,65,0.55); }
+    #home-btn:active { transform: scale(0.96); }
+
+    #header-title {
+      font-family: 'Bebas Neue', var(--font);
+      font-size: clamp(1.55rem, 4vw, 2.6rem);
+      letter-spacing: 0.18em;
+      color: #fff;
+      text-shadow: 0 2px 16px rgba(0,255,65,0.22);
+      white-space: nowrap;
+    }
+
+    /* ── Search bar ── */
+    #search-wrap { position: relative; }
+    #search-icon {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      font-size: 1.05rem; pointer-events: none; user-select: none;
+    }
+    #search-input {
+      width: 100%;
+      padding: 0.72rem 2.8rem 0.72rem 2.8rem;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 12px;
+      color: #fff; font-family: var(--font);
+      font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em;
+      transition: border-color 0.15s, background 0.15s;
+      outline: none; user-select: text;
+    }
+    #search-input::placeholder { color: rgba(255,255,255,0.30); }
+    #search-input:focus {
+      border-color: rgba(0,255,65,0.50);
+      background: rgba(255,255,255,0.10);
+    }
+    #search-clear {
+      position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: rgba(255,255,255,0.36);
+      font-size: 1.1rem; cursor: pointer; padding: 0.35rem;
+      display: none; font-family: var(--font);
+      transition: color 0.15s;
+    }
+    #search-clear.visible { display: block; }
+    #search-clear:hover { color: rgba(255,255,255,0.72); }
+
+    /* ── Breadcrumb ── */
+    #breadcrumb {
+      padding: 0.55rem 1.4rem 0;
+      display: none; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+      font-size: 0.80rem; letter-spacing: 0.13em;
+      color: rgba(255,255,255,0.35);
+      flex-shrink: 0;
+    }
+    #breadcrumb.visible { display: flex; }
+    .bc-link { cursor: pointer; transition: color 0.12s; }
+    .bc-link:hover { color: rgba(255,255,255,0.72); }
+    .bc-cur { color: rgba(255,255,255,0.55); }
+    .bc-sep { color: rgba(255,255,255,0.18); }
+
+    /* ── Main ── */
+    #main { flex: 1; padding: 1.4rem; }
+
+    /* ── View animation ── */
+    .view { animation: fade-up 0.22s cubic-bezier(0.22,0.61,0.36,1); }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Section label ── */
+    .sec-label {
+      font-size: 0.76rem; letter-spacing: 0.26em;
+      color: rgba(255,255,255,0.32);
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+
+    /* ── Category grid ── */
+    #cat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+      gap: 1rem;
+    }
+    .cat-card {
+      background: var(--ck);
+      border: 2.5px solid var(--cr);
+      border-radius: 22px;
+      padding: 1.5rem 1.1rem 1.3rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.6rem; text-align: center;
+      cursor: pointer; user-select: none;
+      transition: filter 0.15s, transform 0.12s, box-shadow 0.15s;
+    }
+    .cat-card:hover  { filter: brightness(1.38); box-shadow: 0 6px 28px rgba(0,0,0,0.38); }
+    .cat-card:active { transform: scale(0.95); }
+    .cat-icon  { font-size: 2.8rem; line-height: 1; }
+    .cat-name  { font-size: clamp(1rem, 2vw, 1.22rem); font-weight: 700; letter-spacing: 0.06em; color: #fff; }
+    .cat-count { font-size: 0.76rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.42); }
+
+    /* ── Problem list ── */
+    #prob-list { display: flex; flex-direction: column; gap: 0.7rem; }
+    .prob-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.11);
+      border-radius: 18px;
+      padding: 1.05rem 1.3rem;
+      cursor: pointer; user-select: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .prob-card:hover  { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
+    .prob-card:active { transform: scale(0.98); }
+    .prob-icon  { font-size: 2rem; flex-shrink: 0; }
+    .prob-title {
+      flex: 1; color: rgba(255,255,255,0.90);
+      font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 600;
+      letter-spacing: 0.03em; line-height: 1.35;
+    }
+    .prob-arrow { color: rgba(255,255,255,0.28); font-size: 1.5rem; flex-shrink: 0; }
+
+    /* ── Back button ── */
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.68rem 1.3rem; margin-bottom: 1rem;
+      background: rgba(255,255,255,0.07);
+      border: 1.5px solid rgba(255,255,255,0.17);
+      border-radius: 11px;
+      color: rgba(255,255,255,0.72); font-family: var(--font);
+      font-size: 0.94rem; font-weight: 700; letter-spacing: 0.12em;
+      cursor: pointer; transition: background 0.15s, color 0.15s, transform 0.10s;
+      user-select: none;
+    }
+    .back-btn:hover  { background: rgba(255,255,255,0.13); color: #fff; }
+    .back-btn:active { transform: scale(0.97); }
+
+    /* ── Answer view ── */
+    #answer-view {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 1.4rem 0 2rem;
+    }
+    #answer-cat-badge {
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.38rem 1rem;
+      background: var(--bk, rgba(255,255,255,0.08));
+      border: 1.5px solid var(--br, rgba(255,255,255,0.18));
+      border-radius: 999px;
+      font-size: 0.80rem; letter-spacing: 0.16em;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 1.1rem;
+    }
+    #answer-icon  { font-size: 4.5rem; line-height: 1; margin-bottom: 0.55rem; }
+    #answer-title {
+      font-family: 'Bebas Neue', var(--font);
+      font-size: clamp(1.45rem, 3vw, 2.1rem);
+      letter-spacing: 0.14em; color: #fff;
+      text-align: center; margin-bottom: 1.5rem;
+      max-width: 680px;
+    }
+
+    /* ── Step cards ── */
+    #steps-list {
+      width: 100%; max-width: 680px;
+      display: flex; flex-direction: column; gap: 0.65rem;
+      margin-bottom: 1.6rem;
+    }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 0.9rem;
+      background: rgba(255,255,255,0.055);
+      border: 1.5px solid rgba(255,255,255,0.09);
+      border-radius: 14px;
+      padding: 0.95rem 1.1rem;
+    }
+    .step-num {
+      width: 26px; height: 26px; flex-shrink: 0;
+      background: rgba(0,255,65,0.14);
+      border: 1.5px solid rgba(0,255,65,0.30);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.82rem; font-weight: 700; color: var(--accent);
+      margin-top: 0.1rem;
+    }
+    .step-text {
+      color: rgba(255,255,255,0.87);
+      font-size: clamp(0.98rem, 2vw, 1.18rem);
+      line-height: 1.55; flex: 1;
+    }
+    .step-text strong { color: #fff; }
+
+    /* ── ICT escalation / info box ── */
+    .info-box {
+      width: 100%; max-width: 680px;
+      border-radius: 18px;
+      padding: 1.15rem 1.5rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .info-box.warn {
+      background: rgba(255,0,51,0.10);
+      border: 2px solid rgba(255,0,51,0.30);
+    }
+    .info-box.info {
+      background: rgba(34,197,94,0.08);
+      border: 2px solid rgba(34,197,94,0.28);
+    }
+    .info-box-title {
+      font-size: 0.88rem; font-weight: 700; letter-spacing: 0.18em;
+    }
+    .info-box.warn .info-box-title { color: rgba(255,100,100,0.90); }
+    .info-box.info .info-box-title { color: rgba(100,220,120,0.90); }
+    .info-box-text {
+      font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+      color: rgba(255,255,255,0.68); line-height: 1.5;
+    }
+    .ict-mail-link {
+      align-self: flex-start;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.3rem;
+      background: rgba(255,0,51,0.16);
+      border: 1.5px solid rgba(255,0,51,0.38);
+      border-radius: 10px;
+      color: rgba(255,140,140,0.95); font-family: var(--font);
+      font-size: 0.94rem; font-weight: 700; letter-spacing: 0.12em;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.10s;
+    }
+    .ict-mail-link:hover  { background: rgba(255,0,51,0.26); border-color: rgba(255,0,51,0.58); }
+    .ict-mail-link:active { transform: scale(0.97); }
+
+    /* ── Search results ── */
+    #search-results { display: flex; flex-direction: column; gap: 0.7rem; }
+    .sr-card {
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.11);
+      border-radius: 18px;
+      padding: 0.95rem 1.3rem;
+      cursor: pointer; user-select: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.12s;
+    }
+    .sr-card:hover  { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.26); }
+    .sr-card:active { transform: scale(0.98); }
+    .sr-icon  { font-size: 1.9rem; flex-shrink: 0; }
+    .sr-info  { flex: 1; }
+    .sr-cat   { font-size: 0.76rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.36); margin-bottom: 0.18rem; }
+    .sr-title { font-size: clamp(0.98rem, 1.9vw, 1.22rem); font-weight: 600; color: rgba(255,255,255,0.90); }
+    .sr-arrow { color: rgba(255,255,255,0.28); font-size: 1.4rem; flex-shrink: 0; }
+
+    .no-results {
+      text-align: center; padding: 2.5rem 1rem;
+      color: rgba(255,255,255,0.28);
+      font-size: 1.1rem; letter-spacing: 0.08em; line-height: 1.7;
+    }
+    .no-results strong { color: rgba(255,255,255,0.55); }
+
+    /* ── Focus ── */
+    :focus-visible { outline: 2.5px solid rgba(0,255,65,0.55); outline-offset: 3px; }
+    :focus:not(:focus-visible) { outline: none; }
+  </style>
+</head>
+<body>
+<div id="page">
+
+  <!-- Header -->
+  <div id="header">
+    <div id="header-top">
+      <a id="home-btn" href="index.html">← TERUG NAAR KIOSK</a>
+      <div id="header-title">🔍 ICT BESLISBOOM</div>
+    </div>
+    <div id="search-wrap">
+      <span id="search-icon">🔎</span>
+      <input id="search-input" type="search"
+             placeholder="Zoek je probleem… bijv. 'wifi', 'printer', 'wachtwoord'"
+             autocomplete="off" spellcheck="false" aria-label="Zoek in de FAQ">
+      <button id="search-clear" aria-label="Zoekopdracht wissen">✕</button>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div id="breadcrumb" role="navigation" aria-label="Locatie"></div>
+
+  <!-- Main content injected by JS -->
+  <div id="main"></div>
+
+</div>
+<script>
+  // ── Data ─────────────────────────────────────────────────────
+  const TREE = [
+    {
+      id: 'apparaat', icon: '💻', title: 'Apparaat',
+      kleur: 'rgba(59,130,246,0.18)', rand: 'rgba(59,130,246,0.50)',
+      problemen: [
+        {
+          icon: '🖥️', title: 'Geen verbinding met extern scherm of beeldscherm',
+          stappen: [
+            'Controleer of de <strong>HDMI- of USB-C-kabel</strong> goed is aangesloten aan beide zijden.',
+            'Controleer of het scherm of smartboard <strong>aanstaat</strong>.',
+            'Activeer het externe scherm: op <strong>Windows</strong> druk je op <strong>Windows + P</strong> → kies "Dupliceren" of "Uitbreiden"; op <strong>Mac</strong>: Systeeminstellingen → Beeldschermen.',
+            'Start de laptop <strong>opnieuw op</strong> met de kabel aangesloten.',
+          ],
+          ict: true, ictTekst: 'Nog steeds geen beeld? Meld het bij ICT.'
+        },
+        {
+          icon: '🔊', title: 'Geen geluid op smartboard of extern scherm',
+          stappen: [
+            'Controleer het <strong>volume</strong> op zowel de laptop als het smartboard / externe scherm.',
+            'Controleer de <strong>audio-uitvoer</strong>: op Windows via de taakbalk → geluidspictogram → kies het juiste apparaat; op Mac via Systeeminstellingen → Geluid → Uitvoer.',
+            'Sluit de HDMI-kabel <strong>opnieuw aan</strong> (ontkoppelen en weer verbinden).',
+          ],
+          ict: true, ictTekst: 'Nog steeds geen geluid? Meld het bij ICT.'
+        },
+        {
+          icon: '⚡', title: 'Laptop start niet op',
+          stappen: [
+            'Controleer of de laptop <strong>opgeladen</strong> is – sluit de oplader aan en wacht minimaal 5 minuten.',
+            'Houd de <strong>aan/uit-knop 10 seconden</strong> ingedrukt voor een harde herstart.',
+            'Controleer of er een <strong>foutmelding</strong> op het scherm staat en noteer deze.',
+          ],
+          ict: true, ictTekst: 'Laptop doet niets of blijft hangen op een foutscherm? Breng hem naar ICT.'
+        },
+        {
+          icon: '📶', title: 'Wifi werkt niet op laptop',
+          stappen: [
+            'Controleer welk netwerk je gebruikt: <strong>leerlingen</strong> → Dalton-Leerling of Dalton-Leerling-Xtra; <strong>medewerkers</strong> → Dalton-Medewerker of Dalton-BYD-Medewerkers.',
+            'Schakel wifi <strong>uit en weer aan</strong> (vliegtuigmodus aan en dan weer uit).',
+            '<strong>Herstart</strong> de laptop.',
+            'Controleer of andere apparaten wel verbinding hebben (netwerk- of laptop-probleem?).',
+          ],
+          ict: true, ictTekst: 'Geen verbinding op meerdere apparaten? Meld bij ICT.'
+        },
+        {
+          icon: '📱', title: 'App werkt niet op laptop of telefoon',
+          stappen: [
+            'Sluit de app <strong>volledig</strong> af (ook vanuit de achtergrond) en open hem opnieuw.',
+            'Controleer of er <strong>updates</strong> beschikbaar zijn voor de app.',
+            '<strong>Herstart</strong> het apparaat.',
+            'Controleer of de app een actieve <strong>internetverbinding</strong> vereist.',
+          ],
+          ict: true, ictTekst: 'App werkt nog steeds niet? Stuur een mail met de naam van de app en wat er misgaat.'
+        },
+      ]
+    },
+    {
+      id: 'account', icon: '🔐', title: 'Account / Inloggen',
+      kleur: 'rgba(239,68,68,0.18)', rand: 'rgba(239,68,68,0.50)',
+      problemen: [
+        {
+          icon: '📧', title: 'Geen e-mail ontvangen',
+          stappen: [
+            'Controleer de map <strong>Spam</strong> of <strong>Ongewenste e-mail</strong>.',
+            'Zoek op de naam of het e-mailadres van de <strong>afzender</strong>.',
+            'Controleer of je <strong>mailbox vol</strong> is (Microsoft 365: maximaal 50 GB).',
+            'Vraag de afzender om het bericht <strong>opnieuw te sturen</strong>.',
+          ],
+          ict: true, ictTekst: 'Nog niets ontvangen na bovenstaande stappen? Neem contact op met ICT.'
+        },
+        {
+          icon: '📲', title: 'MFA (twee-staps-verificatie) werkt niet',
+          stappen: [
+            'Controleer of de <strong>tijd op je telefoon automatisch</strong> wordt ingesteld: Instellingen → Datum & tijd → Automatisch instellen.',
+            'Controleer of je de juiste app gebruikt: <strong>Microsoft Authenticator</strong>.',
+            'Controleer of je telefoon een actieve <strong>internetverbinding</strong> heeft.',
+            'Probeer een <strong>sms-verificatie</strong> als alternatief (als dit voor jou is ingesteld).',
+          ],
+          ict: true, ictTekst: 'MFA resetten of opnieuw instellen kan alleen via ICT.'
+        },
+        {
+          icon: '🔒', title: 'Kan niet meer inloggen op mijn account',
+          stappen: [
+            'Controleer de <strong>gebruikersnaam</strong>: leerlingen gebruiken hun leerlingnummer + @daltondenhaag.nl.',
+            'Controleer of <strong>Caps Lock</strong> niet actief is.',
+            'Probeer op een <strong>ander apparaat</strong> in te loggen om te bepalen of het aan dit apparaat ligt.',
+            'Wacht 15 minuten als je account mogelijk is geblokkeerd door teveel foutieve pogingen.',
+          ],
+          ict: true, ictTekst: 'Account ontgrendelen of wachtwoord resetten? Dat doet ICT of de administratie voor je.'
+        },
+        {
+          icon: '🔑', title: 'Wachtwoord vergeten',
+          stappen: [
+            'Ga naar <strong>login.microsoftonline.com</strong> en klik op "Wachtwoord vergeten".',
+            'Volg de stappen voor <strong>zelfherstel via e-mail of sms</strong> (werkt als je dit eerder hebt ingesteld).',
+            'Lukt zelfherstel niet? Ga naar de <strong>administratie of ICT</strong> met je schoolpas.',
+          ],
+          ict: true, ictTekst: 'ICT kan het wachtwoord voor je resetten. Neem je schoolpas mee.'
+        },
+      ]
+    },
+    {
+      id: 'software', icon: '🖥️', title: 'Software / Toetsen',
+      kleur: 'rgba(168,85,247,0.18)', rand: 'rgba(168,85,247,0.50)',
+      problemen: [
+        {
+          icon: '📝', title: 'Test-Correct – toets opent niet of werkt niet',
+          stappen: [
+            'Controleer je <strong>internetverbinding</strong>.',
+            'Ververs de pagina met <strong>F5</strong> of <strong>Ctrl+R</strong>.',
+            'Probeer een andere browser: gebruik <strong>Google Chrome</strong> als je Edge of Firefox gebruikt.',
+            'Wis de <strong>browsercache</strong>: druk op Ctrl+Shift+Del → selecteer "Gecachede bestanden" → wissen.',
+          ],
+          ict: true, ictTekst: 'Meld het probleem ook bij je docent zodat een alternatief kan worden geregeld.'
+        },
+        {
+          icon: '📤', title: 'Test-Correct – toets inleveren lukt niet',
+          stappen: [
+            'Controleer je <strong>internetverbinding</strong> – inleveren vereist een actieve verbinding.',
+            'Ververs de pagina <strong>niet</strong> – dit kan je antwoorden wissen.',
+            'Probeer de knop nogmaals na <strong>30 seconden</strong> wachten.',
+            'Maak een <strong>screenshot</strong> van je antwoorden als back-up voordat je verder probeert.',
+          ],
+          ict: true, ictTekst: 'Informeer je docent direct en stuur de screenshot als bewijs.'
+        },
+        {
+          icon: '📋', title: 'SPOTS – toets start niet of scherm is vastgelopen',
+          stappen: [
+            '<strong>Herstart</strong> de browser volledig (sluit alle tabbladen en vensters).',
+            'Wis de <strong>cache</strong>: ga naar Instellingen → Privacy → Cache wissen.',
+            '<strong>Log opnieuw in</strong> op SPOTS.',
+            'Probeer een <strong>andere browser</strong>.',
+          ],
+          ict: true, ictTekst: 'Meld het ook bij je docent zodat een alternatieve afname ingepland kan worden.'
+        },
+        {
+          icon: '🎬', title: 'Video bewerken – software start niet of exporteren mislukt',
+          stappen: [
+            'Controleer of er genoeg <strong>vrije opslagruimte</strong> is (minimaal 2 GB vrij aanbevolen).',
+            'Controleer of het bestand <strong>lokaal</strong> op de laptop staat – niet alleen in de cloud.',
+            'Sluit de software volledig af en <strong>open hem opnieuw</strong>.',
+            '<strong>Herstart</strong> de laptop.',
+          ],
+          ict: true, ictTekst: 'ICT ondersteuning aanvragen voor softwareproblemen bij videobewerkingsprogramma\'s.'
+        },
+        {
+          icon: '📷', title: 'Foto bewerken – software of bestand werkt niet',
+          stappen: [
+            'Controleer of het bestandstype wordt <strong>ondersteund</strong> door de software.',
+            'Controleer de beschikbare <strong>opslagruimte</strong>.',
+            '<strong>Herstart</strong> de software.',
+          ],
+          ict: true, ictTekst: 'ICT ondersteuning aanvragen voor fotobewerkingsproblemen.'
+        },
+        {
+          icon: '⚙️', title: 'Andere software werkt niet',
+          stappen: [
+            'Sluit de software volledig af en <strong>open hem opnieuw</strong>.',
+            '<strong>Herstart</strong> de laptop.',
+            'Controleer of er <strong>updates</strong> beschikbaar zijn voor het programma.',
+            'Controleer of je <strong>administrator-rechten</strong> nodig hebt (vraag dit aan ICT).',
+          ],
+          ict: true, ictTekst: 'Stuur een mail met de naam van het programma en de foutmelding.'
+        },
+      ]
+    },
+    {
+      id: 'printen', icon: '🖨️', title: 'Printen',
+      kleur: 'rgba(34,197,94,0.18)', rand: 'rgba(34,197,94,0.50)',
+      problemen: [
+        {
+          icon: '🖨️', title: 'Kan niet printen',
+          stappen: [
+            'Controleer of je verbonden bent met het <strong>schoolwifi</strong> (niet een mobiele hotspot).',
+            'Controleer of je de <strong>juiste printer</strong> hebt geselecteerd (zoek op "Dalton" in de printerlijst).',
+            'Controleer of de printer <strong>aanstaat</strong> en voldoende papier heeft.',
+            '<strong>Herstart</strong> de laptop en probeer opnieuw.',
+          ],
+          ict: true, ictTekst: 'Lukt het nog steeds niet? Meld bij ICT.'
+        },
+        {
+          icon: '💳', title: 'Follow Me printer werkt niet (pas scannen)',
+          stappen: [
+            'Controleer of je je pas <strong>correct hebt gescand</strong> – wacht tot het scherm reageert.',
+            '<strong>Selecteer de printer opnieuw</strong> op het scherm van de Follow Me printer.',
+            '<strong>Log opnieuw in</strong> op je laptop en stuur het printjob opnieuw.',
+            'Controleer of je printjob nog in de <strong>wachtrij</strong> staat via Instellingen → Printers.',
+          ],
+          ict: true, ictTekst: 'Meld bij de administratie of ICT als de printer niet reageert of beschadigd lijkt.'
+        },
+        {
+          icon: '🔍', title: 'Printer niet zichtbaar in de lijst',
+          stappen: [
+            'Controleer of je verbonden bent met het <strong>schoolnetwerk</strong>.',
+            '<strong>Herstart</strong> de laptop.',
+            'Ga naar Instellingen → Printers en controleer of er een <strong>schoolprinter</strong> aanwezig is.',
+          ],
+          ict: true, ictTekst: 'ICT kan de schoolprinter opnieuw voor je installeren.'
+        },
+      ]
+    },
+    {
+      id: 'audio_beeld', icon: '🎙️', title: 'Audio / Beeld',
+      kleur: 'rgba(251,191,36,0.18)', rand: 'rgba(251,191,36,0.50)',
+      problemen: [
+        {
+          icon: '🖥️', title: 'Extern scherm doet het niet',
+          stappen: [
+            'Controleer of de <strong>HDMI- of USB-C-kabel</strong> goed is aangesloten.',
+            'Activeer het externe scherm: op <strong>Windows</strong> druk je op <strong>Windows + P</strong>; op <strong>Mac</strong>: Systeeminstellingen → Beeldschermen.',
+            '<strong>Herstart</strong> de laptop.',
+          ],
+          ict: true, ictTekst: 'Nog steeds geen beeld? Meld bij ICT.'
+        },
+        {
+          icon: '📺', title: 'Geen geluid op smartboard',
+          stappen: [
+            'Controleer het <strong>volume</strong> op zowel de laptop als het smartboard.',
+            'Selecteer het smartboard als <strong>audio-uitvoerapparaat</strong> in de geluidsinstellingen.',
+            'Sluit de <strong>HDMI-kabel</strong> opnieuw aan.',
+          ],
+          ict: true, ictTekst: 'Nog steeds geen geluid? Meld bij ICT.'
+        },
+        {
+          icon: '📽️', title: 'Beamer werkt niet',
+          stappen: [
+            'Controleer of de beamer <strong>aanstaat</strong> (check het indicatielampje).',
+            'Controleer de <strong>kabelaansluiting</strong> (HDMI of VGA) aan beide zijden.',
+            'Selecteer de juiste <strong>ingang</strong> op de beamer (bijv. HDMI 1, VGA).',
+            'Gebruik <strong>Windows + P</strong> om de uitvoermodus te kiezen.',
+          ],
+          ict: true, ictTekst: 'Beamer reageert niet? Vraag bij de administratie om Meneer Faro te bellen.'
+        },
+        {
+          icon: '📊', title: 'Presentatie werkt niet (beeld of geluid)',
+          stappen: [
+            'Controleer alle <strong>kabelaansluitingen</strong>.',
+            'Kies de juiste <strong>ingang</strong> op het scherm of de beamer.',
+            '<strong>Koppel de laptop los</strong> en verbind hem opnieuw.',
+            'Start de <strong>presentatiesoftware opnieuw</strong> op (bijv. PowerPoint).',
+          ],
+          ict: true, ictTekst: 'Meld bij ICT als het probleem tijdens een les optreedt.'
+        },
+      ]
+    },
+    {
+      id: 'bestanden', icon: '📁', title: 'Bestanden / PDF / Cloud',
+      kleur: 'rgba(20,184,166,0.18)', rand: 'rgba(20,184,166,0.50)',
+      problemen: [
+        {
+          icon: '📄', title: 'Kan geen PDF maken',
+          stappen: [
+            'Kies in de applicatie voor <strong>Bestand → Opslaan als → PDF</strong>.',
+            'Gebruik het <strong>printmenu</strong>: selecteer "Microsoft Print to PDF" als printer en klik op Afdrukken.',
+            'Controleer of het document <strong>niet is beveiligd</strong> of vergrendeld.',
+          ],
+          ict: true, ictTekst: 'Lukt het nog steeds niet? Stuur het bestand naar ICT, die helpen je verder.'
+        },
+        {
+          icon: '💿', title: 'DVD of schijf digitaal opslaan in de cloud',
+          stappen: [
+            '<strong>Lever de DVD in</strong> bij ICT of de administratie.',
+            'ICT zet de bestanden om naar digitale cloudopslag (<strong>OneDrive / SharePoint</strong>).',
+            'Je ontvangt een <strong>download- of sharelink</strong> via e-mail zodra het klaar is.',
+          ],
+          ict: false, ictTekst: 'Dit is een dienst van ICT – lever de DVD aan, zij regelen de rest.'
+        },
+        {
+          icon: '⬆️', title: 'Bestand uploaden lukt niet',
+          stappen: [
+            'Controleer je <strong>internetverbinding</strong>.',
+            'Controleer of het bestand <strong>niet te groot</strong> is (OneDrive: max. 250 GB per bestand).',
+            'Probeer een <strong>andere browser</strong> of de desktop-app van OneDrive.',
+            'Controleer of je nog voldoende <strong>cloudopslag</strong> hebt.',
+          ],
+          ict: true, ictTekst: 'Upload-fout die blijft terugkomen? Stuur de foutmelding naar ICT.'
+        },
+        {
+          icon: '📂', title: 'Bestand openen lukt niet',
+          stappen: [
+            'Controleer of de juiste <strong>software</strong> is geïnstalleerd voor dit bestandstype.',
+            'Controleer of het bestand niet <strong>beschadigd</strong> is (probeer een ander exemplaar).',
+            'Probeer het bestand te <strong>downloaden en lokaal te openen</strong> in plaats van direct via de browser.',
+          ],
+          ict: true, ictTekst: 'Bestand nog steeds niet te openen? Stuur het naar ICT ter controle.'
+        },
+      ]
+    },
+    {
+      id: 'reparatie', icon: '🔧', title: 'Reparatie laptop',
+      kleur: 'rgba(249,115,22,0.18)', rand: 'rgba(249,115,22,0.50)',
+      problemen: [
+        {
+          icon: '🏫', title: 'Schoollaptop ter reparatie aanbieden',
+          stappen: [
+            '<strong>Stap 1:</strong> Meld het probleem bij de <strong>administratie</strong>.',
+            '<strong>Stap 2:</strong> De administratie neemt contact op met <strong>ICT</strong>.',
+            '<strong>Stap 3:</strong> ICT beoordeelt het probleem en bepaalt of reparatie nodig is.',
+            '<strong>Stap 4:</strong> Reparatie verloopt via <strong>The Rent Company</strong>.',
+            '<strong>Stap 5:</strong> Indien nodig ontvang je een <strong>vervangende laptop</strong> tijdens de reparatie.',
+          ],
+          ict: false, ictTekst: 'Meld altijd eerst bij de administratie – zij starten het reparatieproces.'
+        },
+        {
+          icon: '💻', title: 'Eigen laptop is kapot (niet-schoollaptop)',
+          stappen: [
+            'Eigen laptops vallen <strong>buiten de ICT-dienstverlening</strong> van de school.',
+            'Je kunt een <strong>leenlaptop aanvragen</strong> bij ICT als je die nodig hebt voor schoolwerk.',
+            'Neem contact op met de <strong>fabrikant of een reparatiewinkel</strong> voor je eigen apparaat.',
+          ],
+          ict: false, ictTekst: 'Leenlaptop aanvragen? Neem contact op met ICT of wacht bij de balie.'
+        },
+        {
+          icon: '💥', title: 'Laptop is beschadigd of gevallen',
+          stappen: [
+            'Gebruik de laptop <strong>niet meer</strong> bij zichtbare schade (gebarsten scherm, vervormd chassis).',
+            'Meld de schade direct bij de <strong>administratie</strong>.',
+            'Is de laptop eigendom van school? Reparatie via <strong>The Rent Company</strong>.',
+            'Neem je <strong>oplaadkabel en tas</strong> mee bij het inleveren.',
+          ],
+          ict: false, ictTekst: 'Meld altijd bij de administratie, ook bij ongelukken – geen zorgen, het wordt geregeld.'
+        },
+      ]
+    },
+  ];
+
+  // ── State ─────────────────────────────────────────────────────
+  let catIdx  = null;
+  let probIdx = null;
+
+  // ── Elements ──────────────────────────────────────────────────
+  const main       = document.getElementById('main');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const searchInput = document.getElementById('search-input');
+  const searchClear = document.getElementById('search-clear');
+
+  // ── Helpers ───────────────────────────────────────────────────
+  function stripHtml(s) { return s.replace(/<[^>]+>/g, ''); }
+
+  function setBreadcrumb(ci, pi) {
+    if (ci === null) { breadcrumb.className = ''; return; }
+    breadcrumb.className = 'visible';
+    const cat = TREE[ci];
+    if (pi === null) {
+      breadcrumb.innerHTML =
+        `<span class="bc-link" onclick="showCats()">Start</span>
+         <span class="bc-sep">›</span>
+         <span class="bc-cur">${cat.icon} ${cat.title}</span>`;
+    } else {
+      const prob = cat.problemen[pi];
+      breadcrumb.innerHTML =
+        `<span class="bc-link" onclick="showCats()">Start</span>
+         <span class="bc-sep">›</span>
+         <span class="bc-link" onclick="showProbs(${ci})">${cat.icon} ${cat.title}</span>
+         <span class="bc-sep">›</span>
+         <span class="bc-cur">${prob.title}</span>`;
+    }
+  }
+
+  // ── Views ─────────────────────────────────────────────────────
+  function showCats() {
+    catIdx = null; probIdx = null;
+    setBreadcrumb(null, null);
+    main.innerHTML = `
+      <div class="view">
+        <div class="sec-label">Waar gaat je vraag over?</div>
+        <div id="cat-grid">
+          ${TREE.map((cat, i) => `
+            <div class="cat-card" onclick="showProbs(${i})"
+                 style="--ck:${cat.kleur};--cr:${cat.rand}">
+              <span class="cat-icon">${cat.icon}</span>
+              <span class="cat-name">${cat.title}</span>
+              <span class="cat-count">${cat.problemen.length} onderwerp${cat.problemen.length !== 1 ? 'en' : ''}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function showProbs(ci) {
+    catIdx = ci; probIdx = null;
+    const cat = TREE[ci];
+    setBreadcrumb(ci, null);
+    main.innerHTML = `
+      <div class="view">
+        <button class="back-btn" onclick="showCats()">← Terug naar overzicht</button>
+        <div class="sec-label">${cat.icon} ${cat.title.toUpperCase()} – Wat is het probleem?</div>
+        <div id="prob-list">
+          ${cat.problemen.map((p, i) => `
+            <div class="prob-card" onclick="showAnswer(${ci},${i})">
+              <span class="prob-icon">${p.icon}</span>
+              <span class="prob-title">${p.title}</span>
+              <span class="prob-arrow">›</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  function showAnswer(ci, pi) {
+    catIdx = ci; probIdx = pi;
+    const cat  = TREE[ci];
+    const prob = cat.problemen[pi];
+    setBreadcrumb(ci, pi);
+
+    const stepsHtml = prob.stappen.map((s, i) => `
+      <div class="step-item">
+        <div class="step-num">${i + 1}</div>
+        <div class="step-text">${s}</div>
+      </div>`).join('');
+
+    const boxHtml = prob.ict
+      ? `<div class="info-box warn">
+           <div class="info-box-title">🚨 WERKT HET NOG STEEDS NIET?</div>
+           <div class="info-box-text">${prob.ictTekst || 'Meld het probleem bij ICT.'}</div>
+           <a class="ict-mail-link"
+              href="mailto:ictdesk@daltondenhaag.nl?subject=${encodeURIComponent('[FAQ] ' + prob.title)}">
+             📧 Mail ICT: ictdesk@daltondenhaag.nl
+           </a>
+         </div>`
+      : `<div class="info-box info">
+           <div class="info-box-title">ℹ️ INFO</div>
+           <div class="info-box-text">${prob.ictTekst || ''}</div>
+         </div>`;
+
+    main.innerHTML = `
+      <div class="view">
+        <button class="back-btn" onclick="showProbs(${ci})">← Terug naar ${cat.title}</button>
+        <div id="answer-view">
+          <div id="answer-cat-badge" style="--bk:${cat.kleur};--br:${cat.rand}">
+            ${cat.icon} ${cat.title.toUpperCase()}
+          </div>
+          <div id="answer-icon">${prob.icon}</div>
+          <div id="answer-title">${prob.title}</div>
+          <div id="steps-list">${stepsHtml}</div>
+          ${boxHtml}
+        </div>
+      </div>`;
+  }
+
+  function showSearch(q) {
+    setBreadcrumb(null, null);
+    const ql = q.toLowerCase();
+    const hits = [];
+    TREE.forEach((cat, ci) => {
+      cat.problemen.forEach((prob, pi) => {
+        const hay = [cat.title, prob.title, ...prob.stappen.map(stripHtml)].join(' ').toLowerCase();
+        if (hay.includes(ql)) hits.push({ ci, pi, cat, prob });
+      });
+    });
+    const resultsHtml = hits.length
+      ? hits.map(h => `
+          <div class="sr-card" onclick="showAnswer(${h.ci},${h.pi})">
+            <span class="sr-icon">${h.prob.icon}</span>
+            <div class="sr-info">
+              <div class="sr-cat">${h.cat.icon} ${h.cat.title}</div>
+              <div class="sr-title">${h.prob.title}</div>
+            </div>
+            <span class="sr-arrow">›</span>
+          </div>`).join('')
+      : `<div class="no-results">
+           Geen resultaten voor <strong>"${q}"</strong>.<br>
+           Probeer een ander zoekwoord of kies een categorie hieronder.
+         </div>`;
+    main.innerHTML = `
+      <div class="view">
+        <div class="sec-label">Zoekresultaten voor "${q}" — ${hits.length} gevonden</div>
+        <div id="search-results">${resultsHtml}</div>
+      </div>`;
+  }
+
+  // ── Search events ─────────────────────────────────────────────
+  searchInput.addEventListener('input', () => {
+    const q = searchInput.value.trim();
+    searchClear.classList.toggle('visible', q.length > 0);
+    if (q.length > 1) {
+      showSearch(q);
+    } else if (catIdx !== null && probIdx !== null) {
+      showAnswer(catIdx, probIdx);
+    } else if (catIdx !== null) {
+      showProbs(catIdx);
+    } else {
+      showCats();
+    }
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = '';
+    searchClear.classList.remove('visible');
+    searchInput.focus();
+    if (catIdx !== null && probIdx !== null) showAnswer(catIdx, probIdx);
+    else if (catIdx !== null) showProbs(catIdx);
+    else showCats();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && searchInput.value) {
+      searchClear.click();
+    } else if (e.key === 'Escape') {
+      if (probIdx !== null) showProbs(catIdx);
+      else if (catIdx !== null) showCats();
+    }
+  });
+
+  // ── Init ──────────────────────────────────────────────────────
+  showCats();
+</script>
+</body>
+</html>
