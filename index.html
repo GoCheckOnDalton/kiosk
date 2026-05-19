@@ -779,7 +779,7 @@
     /* ── Swirl canvas ── */
     #swirl-canvas {
       position: fixed; inset: 0; width: 100%; height: 100%;
-      z-index: 1; pointer-events: none; opacity: 0.30;
+      z-index: 3; pointer-events: none; opacity: 0.15;
     }
   </style>
 </head>
@@ -1633,7 +1633,7 @@
       resize();
 
       function draw() {
-        cx.fillStyle = 'rgba(0,0,0,0.018)';
+        cx.fillStyle = 'rgba(0,0,0,0.007)';
         cx.fillRect(0, 0, W, H);
 
         const ox = W * 0.5, oy = H * 0.5;
@@ -1662,7 +1662,7 @@
         cx.lineWidth = 0.8;
         cx.stroke();
 
-        t += 0.0055;
+        t += 0.0011;
         requestAnimationFrame(draw);
       }
 
